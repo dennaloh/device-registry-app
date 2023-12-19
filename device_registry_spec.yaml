@@ -1,0 +1,402 @@
+openapi: 3.0.0
+info:
+  title: Location API
+  version: 1.0.0
+  description: API for managing a device registry
+
+components:
+  schemas:
+    Device:
+      type: object
+      properties:
+        serial_number:
+          type: string
+          description: device serial number
+        name:
+          type: string
+          description: device name
+        type:
+          type: string
+          description: device type
+        creation_date:
+          type: string
+          format: date
+          description: date of creation of row in devices table automatically set as today's date if not indicated
+        location_id:
+          type: integer
+          description: ID of the device's location from the locations table
+      required:
+        - serial_number
+        - name
+        - type
+        - creation_date
+        - location_id
+    Location:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: location ID is automatically generated when row is created in locations table if not indicated
+        name:
+          type: string
+          description: location name
+        type:
+          type: string
+          description: location type
+      required:
+        - name
+        - type
+
+paths:
+  /locations:
+    get:
+      summary: Retrieve all locations
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Location'
+              example:
+                - id: 1
+                  name: "Location A"
+                  type: "Type A"
+                - id: 2
+                  name: "Location B"
+                  type: "Type B"
+        '404':
+          description: No locations found
+          content:
+            application/json:
+              example:
+                status: "not found"
+                message: "No locations found in locations table"
+                
+    post:
+      summary: Add a new location
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Location'
+            example:
+              id: 3
+              name: "Location C"
+              type: "Type C"
+      responses:
+        '200':
+          description: Successful creation
+          content:
+            application/json:
+              example:
+                status: "success"
+                message: "New location created successfully"
+
+  /locations/{id}:
+    put:
+      summary: Update a location by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Location'
+            example:
+              name: "Updated Location Name"
+              type: "Updated Type"
+      responses:
+        '200':
+          description: Successful update
+          content:
+            application/json:
+              example:
+                status: "success"
+                message: "Updated location successfully"
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              example:
+                status: "invalid"
+                message: "Invalid request parameters: Need at least name/type"
+        '404':
+          description: Location not found
+          content:
+            application/json:
+              example:
+                status: "not found"
+                message: "Location ID does not exist in locations table"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              example:
+                status: "error"
+                message: "Failed to update location in DBHandler"
+
+    delete:
+      summary: Delete a location by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful deletion
+          content:
+            application/json:
+              example:
+                status: "success"
+                message: "Deleted location and devices with this location id successfully"
+        '404':
+          description: Location not found
+          content:
+            application/json:
+              example:
+                status: "not found"
+                message: "Location ID does not exist in locations table"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              example:
+                status: "error"
+                message: "Failed to delete location and devices with this location id in DBHandler"
+
+  /devices:
+    get:
+      summary: Retrieve all devices
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Device'
+              example:
+                - serial_number: 12345
+                  name: "Device A"
+                  type: "Type A"
+                  creation_date: "2023-01-15"
+                  location_id: 1
+                  location_name: "Location X"
+                  location_type: "Type X"
+                - serial_number: 67890
+                  name: "Device B"
+                  type: "Type B"
+                  creation_date: "2023-02-20"
+                  location_id: 2
+                  location_name: "Location Y"
+                  location_type: "Type Y"
+        '404':
+          description: No devices found
+          content:
+            application/json:
+              example:
+                status: "not found"
+                message: "No devices found in devices table"
+
+    post:
+      summary: Add a new device
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Device'
+            example:
+              serial_number: 12345
+              name: "Device C"
+              type: "Type C"
+              creation_date: "2023-03-25"
+              location_id: 1
+      responses:
+        '200':
+          description: Successful creation
+          content:
+            application/json:
+              example:
+                status: "success"
+                message: "New device created successfully"
+
+  /devices/filter:
+    get:
+      summary: Filter devices by metadata
+      parameters:
+        - name: serial_number
+          in: query
+          schema:
+            type: integer
+            format: int64
+          description: Serial number of the device
+        - name: name
+          in: query
+          schema:
+            type: string
+          description: Name of the device
+        - name: type
+          in: query
+          schema:
+            type: string
+          description: Type of the device
+        - name: creation_date
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Creation date of the device (YYYY-MM-DD)
+        - name: start_date
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Start date for filtering devices (YYYY-MM-DD)
+        - name: end_date
+          in: query
+          schema:
+            type: string
+            format: date
+          description: End date for filtering devices (YYYY-MM-DD)
+        - name: location_id
+          in: query
+          schema:
+            type: integer
+            format: int64
+          description: ID of the device's location
+        - name: location_name
+          in: query
+          schema:
+            type: string
+          description: Name of the device's location
+        - name: location_type
+          in: query
+          schema:
+            type: string
+          description: Type of the device's location
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Device'
+              example:
+                - serial_number: 12345
+                  name: "Device A"
+                  type: "Type A"
+                  creation_date: "2023-01-15"
+                  location_id: 1
+                - serial_number: 67890
+                  name: "Device B"
+                  type: "Type B"
+                  creation_date: "2023-02-20"
+                  location_id: 2
+        '404':
+          description: No devices match filters
+          content:
+            application/json:
+              example:
+                status: "not found"
+                message: "No devices match filters"
+
+
+  /devices/{serial_number}:
+    put:
+      summary: Update a device by serial number
+      parameters:
+        - name: serial_number
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Device'
+            example:
+              name: "Updated Device Name"
+              type: "Updated Type"
+              creation_date: "2023-04-30"
+              location_id: 2
+      responses:
+        '200':
+          description: Successful update
+          content:
+            application/json:
+              example:
+                status: "success"
+                message: "Updated device successfully"
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              example:
+                status: "invalid"
+                message: "Invalid request parameters"
+        '404':
+          description: Device not found
+          content:
+            application/json:
+              example:
+                status: "not found"
+                message: "Device with provided serial number not found"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              example:
+                status: "error"
+                message: "Failed to update device in DBHandler"
+
+    delete:
+      summary: Delete a device by serial number
+      parameters:
+        - name: serial_number
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful deletion
+          content:
+            application/json:
+              example:
+                status: "success"
+                message: "Deleted device successfully"
+        '404':
+          description: Device not found
+          content:
+            application/json:
+              example:
+                status: "not found"
+                message: "Device with provided serial number not found"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              example:
+                status: "error"
+                message: "Failed to delete device due to server error"
