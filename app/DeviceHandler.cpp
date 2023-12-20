@@ -100,7 +100,7 @@ void DeviceHandler::addDevice(const httplib::Request &req, httplib::Response &re
     {
         res.status = 400;
         response["status"] = "invalid";
-        response["message"] = "Invalid request parameters: Must have serial_number, name, type, and location_id";
+        response["message"] = "Invalid request parameters: Must have at least serial_number, name, type, and location_id";
         res.set_content(response.dump(), "application/json");
         return;
     }

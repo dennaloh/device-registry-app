@@ -50,7 +50,7 @@ std::vector<Device> DBHandler::getAllDevices()
 
 // 2. Filter by metadata: Only serial_number, name, type, creation_date, location_id, start_date, end_date, location_name, location_type.
 std::vector<Device> DBHandler::filterDevices(const std::string &serial_number, const std::string &name, const std::string &type,
-                                             const std::string &creation_date, const std::string location_id, const std::string &start_date,
+                                             const std::string &creation_date, const std::string &location_id, const std::string &start_date,
                                              const std::string &end_date, const std::string &location_name, const std::string &location_type)
 {
     std::string sql = "SELECT devices.serial_number, devices.name, devices.type, devices.creation_date, devices.location_id, locations.name, locations.type"
@@ -126,7 +126,7 @@ bool DBHandler::addDevice(const Device &device)
 
 // 4. Update a device: Must be integer serial number. To update serial number, need to delete and post again.
 bool DBHandler::updateDevice(const int serial_number,
-                             const std::string &name, const std::string &type, const std::string &creation_date, const std::string location_id)
+                             const std::string &name, const std::string &type, const std::string &creation_date, const std::string &location_id)
 {
     std::string sql = "UPDATE devices SET ";
     if (!name.empty())
