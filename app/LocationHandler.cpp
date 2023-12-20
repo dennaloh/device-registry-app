@@ -77,7 +77,10 @@ void LocationHandler::addLocation(const httplib::Request &req, httplib::Response
     {
         res.status = 200;
         response["status"] = "success";
-        response["message"] = "New location created successfully";
+        response["message"] = "New location created successfully: " +
+                              std::to_string(newLocation.id) + " | " +
+                              newLocation.name + " | " +
+                              newLocation.type;
     }
     else
     {
@@ -120,7 +123,7 @@ void LocationHandler::updateLocation(const httplib::Request &req, httplib::Respo
     {
         res.status = 200;
         response["status"] = "success";
-        response["message"] = "Updated location successfully";
+        response["message"] = "Successfully updated location: " + std::to_string(id);
     }
     else
     {
@@ -152,7 +155,7 @@ void LocationHandler::deleteLocation(const httplib::Request &req, httplib::Respo
     {
         res.status = 200;
         response["status"] = "success";
-        response["message"] = "Deleted location and devices with this location id successfully";
+        response["message"] = "Successfully deleted location and devices with location id " + std::to_string(id);
         res.set_content(response.dump(), "application/json");
     }
     else
@@ -172,8 +175,8 @@ void LocationHandler::handleRequests(httplib::Server &svr)
     svr.Post("/locations/new", [&](const httplib::Request &req, httplib::Response &res)
              { addLocation(req, res); });
 
-    svr.Put(R"(/locations/(\d+))", [&](const httplib::Request &req, httplib::Response &res)
-            { updateLocation(req, res); });
+    svr.Patch(R"(/locations/(\d+))", [&](const httplib::Request &req, httplib::Response &res)
+              { updateLocation(req, res); });
 
     svr.Delete(R"(/locations/(\d+))", [&](const httplib::Request &req, httplib::Response &res)
                { deleteLocation(req, res); });

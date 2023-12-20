@@ -18,5 +18,6 @@ private:
     void deleteDevice(const httplib::Request &req, httplib::Response &res);
 
     // Helper methods
-    bool isValidDate(const std::string &date);
+    std::string getTodayDate();
+    bool isValidDate(const std::string &dateStr);
 };

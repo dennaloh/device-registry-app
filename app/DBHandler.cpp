@@ -124,7 +124,7 @@ bool DBHandler::addDevice(const Device &device)
     return (rc == SQLITE_DONE);
 }
 
-// 4. Update a device
+// 4. Update a device: Must be integer serial number. To update serial number, need to delete and post again.
 bool DBHandler::updateDevice(const int serial_number,
                              const std::string &name, const std::string &type, const std::string &creation_date, const std::string location_id)
 {

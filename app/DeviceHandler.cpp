@@ -96,11 +96,11 @@ void DeviceHandler::addDevice(const httplib::Request &req, httplib::Response &re
     Device newDevice;
     json response;
 
-    if (!(req.has_param("serial_number") && req.has_param("name") && req.has_param("type") && req.has_param("creation_date") && req.has_param("location_id")))
+    if (!(req.has_param("serial_number") && req.has_param("name") && req.has_param("type") && req.has_param("location_id")))
     {
         res.status = 400;
         response["status"] = "invalid";
-        response["message"] = "Invalid request parameters: Must have serial_number, name, type, creation_date and location_id";
+        response["message"] = "Invalid request parameters: Must have serial_number, name, type, and location_id";
         res.set_content(response.dump(), "application/json");
         return;
     }
@@ -127,15 +127,6 @@ void DeviceHandler::addDevice(const httplib::Request &req, httplib::Response &re
         res.set_content(response.dump(), "application/json");
         return;
     }
-    newDevice.creation_date = req.get_param_value("creation_date");
-    if (!isValidDate(newDevice.creation_date))
-    {
-        res.status = 400;
-        response["status"] = "invalid";
-        response["message"] = "Invalid creation_date";
-        res.set_content(response.dump(), "application/json");
-        return;
-    }
     try
     {
         newDevice.location_id = std::stoi(req.get_param_value("location_id"));
@@ -157,13 +148,35 @@ void DeviceHandler::addDevice(const httplib::Request &req, httplib::Response &re
         return;
     }
 
+    if (req.has_param("creation_date"))
+    {
+        newDevice.creation_date = req.get_param_value("creation_date");
+        if (!isValidDate(newDevice.creation_date))
+        {
+            res.status = 400;
+            response["status"] = "invalid";
+            response["message"] = "Invalid creation_date";
+            res.set_content(response.dump(), "application/json");
+            return;
+        }
+    }
+    else
+    {
+        newDevice.creation_date = getTodayDate();
+    }
+
     auto added = db.addDevice(newDevice);
 
     if (added)
     {
         res.status = 200;
         response["status"] = "success";
-        response["message"] = "New device created successfully";
+        response["message"] = "New device created successfully: " +
+                              std::to_string(newDevice.serial_number) + " | " +
+                              newDevice.name + " | " +
+                              newDevice.type + " | " +
+                              newDevice.creation_date + " | " +
+                              std::to_string(newDevice.location_id);
     }
     else
     {
@@ -235,7 +248,7 @@ void DeviceHandler::updateDevice(const httplib::Request &req, httplib::Response 
     {
         res.status = 200;
         response["status"] = "success";
-        response["message"] = "Updated device successfully";
+        response["message"] = "Successfully updated device: " + std::to_string(serial_number);
     }
     else
     {
@@ -267,7 +280,7 @@ void DeviceHandler::deleteDevice(const httplib::Request &req, httplib::Response 
     {
         res.status = 200;
         response["status"] = "success";
-        response["message"] = "Deleted device successfully";
+        response["message"] = "Successfully deleted device " + std::to_string(serial_number);
         res.set_content(response.dump(), "application/json");
     }
     else
@@ -277,7 +290,7 @@ void DeviceHandler::deleteDevice(const httplib::Request &req, httplib::Response 
         response["message"] = "Failed to delete device in DBHandler";
         res.set_content(response.dump(), "application/json");
     }
-}
+};
 
 void DeviceHandler::handleRequests(httplib::Server &svr)
 {
@@ -290,14 +303,23 @@ void DeviceHandler::handleRequests(httplib::Server &svr)
     svr.Post("/devices/new", [&](const httplib::Request &req, httplib::Response &res)
              { addDevice(req, res); });
 
-    svr.Put(R"(/devices/(\d+))", [&](const httplib::Request &req, httplib::Response &res)
-            { updateDevice(req, res); });
+    svr.Patch(R"(/devices/(\d+))", [&](const httplib::Request &req, httplib::Response &res)
+              { updateDevice(req, res); });
 
     svr.Delete(R"(/devices/(\d+))", [&](const httplib::Request &req, httplib::Response &res)
                { deleteDevice(req, res); });
 }
 
 // Helper methods
+std::string DeviceHandler::getTodayDate()
+{
+    auto now = std::chrono::system_clock::now();
+    auto now_c = std::chrono::system_clock::to_time_t(now);
+    std::stringstream ss;
+    ss << std::put_time(std::localtime(&now_c), "%Y-%m-%d");
+    return ss.str();
+}
+
 bool DeviceHandler::isValidDate(const std::string &dateStr)
 {
     std::tm timeStruct = {0};
