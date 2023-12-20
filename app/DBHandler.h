@@ -36,6 +36,9 @@ public:
                                       const std::string &creation_date, const std::string location_id, const std::string &start_date,
                                       const std::string &end_date, const std::string &location_name, const std::string &location_type);
     bool addDevice(const Device &device);
+    bool updateDevice(const int serial_number,
+                      const std::string &name, const std::string &type, const std::string &creation_date, const std::string location_id);
+    bool deleteDevice(const int serial_number);
 
     // LOCATIONS TABLE OPERATIONS
     std::vector<Location> getAllLocations();

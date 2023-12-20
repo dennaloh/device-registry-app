@@ -175,6 +175,110 @@ void DeviceHandler::addDevice(const httplib::Request &req, httplib::Response &re
     res.set_content(response.dump(), "application/json");
 }
 
+void DeviceHandler::updateDevice(const httplib::Request &req, httplib::Response &res)
+{
+    json response;
+
+    if (!(req.has_param("name") || req.has_param("type") || req.has_param("creation_date") || req.has_param("location_id")))
+    {
+        res.status = 400;
+        response["status"] = "invalid";
+        response["message"] = "Invalid request parameters: Only name &/or type &/or creation_date &/or location_id";
+        res.set_content(response.dump(), "application/json");
+        return;
+    }
+
+    std::string name = req.get_param_value("name");
+    std::string type = req.get_param_value("type");
+    int serial_number = std::stoi(req.matches[1]);
+    if (!db.serialNumExists(serial_number))
+    {
+        res.status = 404;
+        response["status"] = "not found";
+        response["message"] = "Serial Number does not exist in devices table";
+        res.set_content(response.dump(), "application/json");
+        return;
+    }
+    std::string creation_date = req.get_param_value("creation_date");
+    if (!creation_date.empty() && !isValidDate(creation_date))
+    {
+        res.status = 400;
+        response["status"] = "invalid";
+        response["message"] = "Invalid creation_date";
+        res.set_content(response.dump(), "application/json");
+        return;
+    }
+    std::string location_id = req.get_param_value("location_id");
+    try
+    {
+        if (!location_id.empty() && !db.locationExists(std::stoi(location_id)))
+        {
+            res.status = 404;
+            response["status"] = "not found";
+            response["message"] = "Location ID does not exist in locations table";
+            res.set_content(response.dump(), "application/json");
+            return;
+        }
+    }
+    catch (...)
+    {
+        res.status = 400;
+        response["status"] = "invalid";
+        response["message"] = "Invalid location_id";
+        res.set_content(response.dump(), "application/json");
+        return;
+    }
+
+    auto updated = db.updateDevice(serial_number, name, type, creation_date, location_id);
+
+    if (updated)
+    {
+        res.status = 200;
+        response["status"] = "success";
+        response["message"] = "Updated device successfully";
+    }
+    else
+    {
+        res.status = 500;
+        response["status"] = "error";
+        response["message"] = "Failed to update device in DBHandler";
+    }
+
+    res.set_content(response.dump(), "application/json");
+}
+
+void DeviceHandler::deleteDevice(const httplib::Request &req, httplib::Response &res)
+{
+    json response;
+
+    int serial_number = std::stoi(req.matches[1]);
+    if (!db.serialNumExists(serial_number))
+    {
+        res.status = 404;
+        response["status"] = "not found";
+        response["message"] = "Serial Number does not exist in devices table";
+        res.set_content(response.dump(), "application/json");
+        return;
+    }
+
+    auto deleted = db.deleteDevice(serial_number);
+
+    if (deleted)
+    {
+        res.status = 200;
+        response["status"] = "success";
+        response["message"] = "Deleted device successfully";
+        res.set_content(response.dump(), "application/json");
+    }
+    else
+    {
+        res.status = 500;
+        response["status"] = "error";
+        response["message"] = "Failed to delete device in DBHandler";
+        res.set_content(response.dump(), "application/json");
+    }
+};
+
 void DeviceHandler::handleRequests(httplib::Server &svr)
 {
     svr.Get("/devices", [&](const httplib::Request &req, httplib::Response &res)
@@ -185,6 +289,12 @@ void DeviceHandler::handleRequests(httplib::Server &svr)
 
     svr.Post("/devices/new", [&](const httplib::Request &req, httplib::Response &res)
              { addDevice(req, res); });
+
+    svr.Put(R"(/devices/(\d+))", [&](const httplib::Request &req, httplib::Response &res)
+            { updateDevice(req, res); });
+
+    svr.Delete(R"(/devices/(\d+))", [&](const httplib::Request &req, httplib::Response &res)
+               { deleteDevice(req, res); });
 }
 
 // Helper methods

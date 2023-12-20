@@ -124,6 +124,83 @@ bool DBHandler::addDevice(const Device &device)
     return (rc == SQLITE_DONE);
 }
 
+// 4. Update a device
+bool DBHandler::updateDevice(const int serial_number,
+                             const std::string &name, const std::string &type, const std::string &creation_date, const std::string location_id)
+{
+    std::string sql = "UPDATE devices SET ";
+    if (!name.empty())
+    {
+        sql += "name = ?, ";
+    }
+    if (!type.empty())
+    {
+        sql += "type = ?, ";
+    }
+    if (!creation_date.empty())
+    {
+        sql += "creation_date = ?, ";
+    }
+    if (!location_id.empty())
+    {
+        sql += "location_id = ?, ";
+    }
+    sql.pop_back();
+    sql.pop_back();
+    sql += "WHERE serial_number = ?";
+
+    sqlite3_stmt *stmt;
+    int rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
+    if (rc != SQLITE_OK)
+    {
+        std::cerr << "Error preparing SQL statement: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    int bind_index = 1;
+    if (!name.empty())
+    {
+        sqlite3_bind_text(stmt, bind_index++, name.c_str(), -1, SQLITE_STATIC);
+    }
+    if (!type.empty())
+    {
+        sqlite3_bind_text(stmt, bind_index++, type.c_str(), -1, SQLITE_STATIC);
+    }
+    if (!creation_date.empty())
+    {
+        sqlite3_bind_text(stmt, bind_index++, creation_date.c_str(), -1, SQLITE_STATIC);
+    }
+    if (!location_id.empty())
+    {
+        sqlite3_bind_text(stmt, bind_index++, location_id.c_str(), -1, SQLITE_STATIC);
+    }
+    sqlite3_bind_int(stmt, bind_index++, serial_number);
+    rc = sqlite3_step(stmt);
+
+    sqlite3_finalize(stmt);
+    return (rc == SQLITE_DONE);
+}
+
+// 5. Delete a device
+bool DBHandler::deleteDevice(const int serial_number)
+{
+    std::string sql = "DELETE FROM devices WHERE serial_number = ?";
+
+    sqlite3_stmt *stmt;
+    int rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
+    if (rc != SQLITE_OK)
+    {
+        std::cerr << "Error preparing SQL statement: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    sqlite3_bind_int(stmt, 1, serial_number);
+    rc = sqlite3_step(stmt);
+
+    sqlite3_finalize(stmt);
+    return (rc == SQLITE_DONE);
+}
+
 // LOCATIONS TABLE OPERATIONS
 // 1. List all locations
 std::vector<Location> DBHandler::getAllLocations()
@@ -296,7 +373,7 @@ bool DBHandler::serialNumExists(int serial_num)
     }
 
     sqlite3_finalize(stmt);
-    return (count > 0); // If count > 0, serial number exists
+    return (count > 0);
 }
 
 // private methods

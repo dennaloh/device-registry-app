@@ -17,6 +17,8 @@ private:
     void listDevices(const httplib::Request &req, httplib::Response &res);
     void filterDevices(const httplib::Request &req, httplib::Response &res);
     void addDevice(const httplib::Request &req, httplib::Response &res);
+    void updateDevice(const httplib::Request &req, httplib::Response &res);
+    void deleteDevice(const httplib::Request &req, httplib::Response &res);
 
     // Helper methods
     bool isValidDate(const std::string &date);
