@@ -36,8 +36,8 @@ public:
                                        const std::string &creation_date, const std::string &location_id, const std::string &start_date,
                                        const std::string &end_date, const std::string &location_name, const std::string &location_type);
     bool add_device(const Device &device);
-    bool update_device(const std::string &serial_number, const std::string &name, const std::string &type, const std::string &creation_date,
-                       const std::string &location_id);
+    bool update_device(const std::string &serial_number, const std::string &name, const std::string &type,
+                       const std::string &creation_date, const std::string &location_id);
     bool delete_device(const std::string &serial_number);
 
     // LOCATIONS TABLE OPERATIONS
@@ -52,7 +52,7 @@ public:
 
 private:
     sqlite3 *db;
-    std::string dbPath;
+    std::string db_path;
 
     // Helper methods
     void bind_device_data(sqlite3_stmt *stmt, const Device &device);

@@ -2,10 +2,10 @@
 
 LocationHandler::LocationHandler(DBHandler &dbHandler) : db(dbHandler) {}
 
-void LocationHandler::listLocations(const httplib::Request &req, httplib::Response &res)
+void LocationHandler::list_locations(const httplib::Request &req, httplib::Response &res)
 {
     json response;
-    auto locations = db.getAllLocations();
+    auto locations = db.get_locations();
 
     if (locations.empty())
     {
@@ -30,7 +30,7 @@ void LocationHandler::listLocations(const httplib::Request &req, httplib::Respon
     res.set_content(response_content.dump(), "application/json");
 }
 
-void LocationHandler::addLocation(const httplib::Request &req, httplib::Response &res)
+void LocationHandler::add_location(const httplib::Request &req, httplib::Response &res)
 {
     Location newLocation;
     json response;
@@ -52,7 +52,7 @@ void LocationHandler::addLocation(const httplib::Request &req, httplib::Response
         try
         {
             newLocation.id = std::stoi(req.get_param_value("id"));
-            if (db.locationExists(newLocation.id))
+            if (db.location_exists(newLocation.id))
             {
                 res.status = 409;
                 response["status"] = "conflict";
@@ -71,7 +71,7 @@ void LocationHandler::addLocation(const httplib::Request &req, httplib::Response
         }
     }
 
-    bool added = db.addLocation(newLocation);
+    bool added = db.add_location(newLocation);
 
     if (added)
     {
@@ -92,7 +92,7 @@ void LocationHandler::addLocation(const httplib::Request &req, httplib::Response
     res.set_content(response.dump(), "application/json");
 }
 
-void LocationHandler::updateLocation(const httplib::Request &req, httplib::Response &res)
+void LocationHandler::update_location(const httplib::Request &req, httplib::Response &res)
 {
     json response;
 
@@ -108,7 +108,7 @@ void LocationHandler::updateLocation(const httplib::Request &req, httplib::Respo
     std::string name = req.get_param_value("name");
     std::string type = req.get_param_value("type");
     int id = std::stoi(req.matches[1]);
-    if (!db.locationExists(id))
+    if (!db.location_exists(id))
     {
         res.status = 404;
         response["status"] = "not found";
@@ -117,7 +117,7 @@ void LocationHandler::updateLocation(const httplib::Request &req, httplib::Respo
         return;
     }
 
-    auto updated = db.updateLocation(id, name, type);
+    auto updated = db.update_location(id, name, type);
 
     if (updated)
     {
@@ -135,12 +135,12 @@ void LocationHandler::updateLocation(const httplib::Request &req, httplib::Respo
     res.set_content(response.dump(), "application/json");
 }
 
-void LocationHandler::deleteLocation(const httplib::Request &req, httplib::Response &res)
+void LocationHandler::delete_location(const httplib::Request &req, httplib::Response &res)
 {
     json response;
 
     int id = std::stoi(req.matches[1]);
-    if (!db.locationExists(id))
+    if (!db.location_exists(id))
     {
         res.status = 404;
         response["status"] = "not found";
@@ -149,7 +149,7 @@ void LocationHandler::deleteLocation(const httplib::Request &req, httplib::Respo
         return;
     }
 
-    auto deleted = db.deleteLocation(id);
+    auto deleted = db.delete_location(id);
 
     if (deleted)
     {
@@ -167,17 +167,17 @@ void LocationHandler::deleteLocation(const httplib::Request &req, httplib::Respo
     }
 }
 
-void LocationHandler::handleRequests(httplib::Server &svr)
+void LocationHandler::handle_requests(httplib::Server &svr)
 {
     svr.Get("/locations", [&](const httplib::Request &req, httplib::Response &res)
-            { listLocations(req, res); });
+            { list_locations(req, res); });
 
     svr.Post("/locations", [&](const httplib::Request &req, httplib::Response &res)
-             { addLocation(req, res); });
+             { add_location(req, res); });
 
     svr.Patch(R"(/locations/(\d+))", [&](const httplib::Request &req, httplib::Response &res)
-              { updateLocation(req, res); });
+              { update_location(req, res); });
 
     svr.Delete(R"(/locations/(\d+))", [&](const httplib::Request &req, httplib::Response &res)
-               { deleteLocation(req, res); });
+               { delete_location(req, res); });
 }

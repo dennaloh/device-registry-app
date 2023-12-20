@@ -1,6 +1,6 @@
 #include "DBHandler.h"
 
-DBHandler::DBHandler(const std::string &db_path) : db(nullptr), dbPath(db_path) {}
+DBHandler::DBHandler(const std::string &db_path) : db(nullptr), db_path(db_path) {}
 
 DBHandler::~DBHandler()
 {
@@ -9,7 +9,7 @@ DBHandler::~DBHandler()
 
 bool DBHandler::open_connection()
 {
-    int rc = sqlite3_open(dbPath.c_str(), &db);
+    int rc = sqlite3_open(db_path.c_str(), &db);
     return (rc == SQLITE_OK);
 }
 
