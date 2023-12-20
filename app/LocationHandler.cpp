@@ -172,7 +172,7 @@ void LocationHandler::handleRequests(httplib::Server &svr)
     svr.Get("/locations", [&](const httplib::Request &req, httplib::Response &res)
             { listLocations(req, res); });
 
-    svr.Post("/locations/new", [&](const httplib::Request &req, httplib::Response &res)
+    svr.Post("/locations", [&](const httplib::Request &req, httplib::Response &res)
              { addLocation(req, res); });
 
     svr.Patch(R"(/locations/(\d+))", [&](const httplib::Request &req, httplib::Response &res)

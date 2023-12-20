@@ -298,7 +298,7 @@ void DeviceHandler::handleRequests(httplib::Server &svr)
     svr.Get("/devices/filter", [&](const httplib::Request &req, httplib::Response &res)
             { filterDevices(req, res); });
 
-    svr.Post("/devices/new", [&](const httplib::Request &req, httplib::Response &res)
+    svr.Post("/devices", [&](const httplib::Request &req, httplib::Response &res)
              { addDevice(req, res); });
 
     svr.Patch(R"(/devices/(\d+))", [&](const httplib::Request &req, httplib::Response &res)
