@@ -1,4 +1,5 @@
 #include "DBHandler.h"
+#include "DeviceHandler.h"
 #include "LocationHandler.h"
 
 int main()
@@ -13,8 +14,10 @@ int main()
     std::cout << "After connection" << std::endl;
 
     httplib::Server svr;
+    DeviceHandler deviceHandler(dbHandler);
     LocationHandler locationHandler(dbHandler);
 
+    deviceHandler.handleRequests(svr);
     locationHandler.handleRequests(svr);
 
     svr.listen("0.0.0.0", 8080);
