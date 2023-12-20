@@ -20,4 +20,5 @@ private:
     // Helper methods
     std::string getTodayDate();
     bool isValidDate(const std::string &dateStr);
+    bool isAlphanumeric(const std::string &str);
 };

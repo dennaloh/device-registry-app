@@ -6,7 +6,7 @@ using json = nlohmann::json;
 
 struct Device
 {
-    int serial_number;
+    std::string serial_number;
     std::string name;
     std::string type;
     std::string creation_date;
@@ -36,9 +36,9 @@ public:
                                       const std::string &creation_date, const std::string &location_id, const std::string &start_date,
                                       const std::string &end_date, const std::string &location_name, const std::string &location_type);
     bool addDevice(const Device &device);
-    bool updateDevice(const int serial_number, const std::string &name, const std::string &type, const std::string &creation_date,
+    bool updateDevice(const std::string &serial_number, const std::string &name, const std::string &type, const std::string &creation_date,
                       const std::string &location_id);
-    bool deleteDevice(const int serial_number);
+    bool deleteDevice(const std::string &serial_number);
 
     // LOCATIONS TABLE OPERATIONS
     std::vector<Location> getAllLocations();
@@ -47,7 +47,7 @@ public:
     bool deleteLocation(const int id);
 
     // Helper methods
-    bool serialNumExists(int serial_num);
+    bool serialNumExists(std::string &serial_num);
     bool locationExists(int location_id);
 
 private:

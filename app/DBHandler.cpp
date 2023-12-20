@@ -125,8 +125,7 @@ bool DBHandler::addDevice(const Device &device)
 }
 
 // 4. Update a device: Must be integer serial number. To update serial number, need to delete and post again.
-bool DBHandler::updateDevice(const int serial_number,
-                             const std::string &name, const std::string &type, const std::string &creation_date, const std::string &location_id)
+bool DBHandler::updateDevice(const std::string &serial_number, const std::string &name, const std::string &type, const std::string &creation_date, const std::string &location_id)
 {
     std::string sql = "UPDATE devices SET ";
     if (!name.empty())
@@ -174,7 +173,7 @@ bool DBHandler::updateDevice(const int serial_number,
     {
         sqlite3_bind_text(stmt, bind_index++, location_id.c_str(), -1, SQLITE_STATIC);
     }
-    sqlite3_bind_int(stmt, bind_index++, serial_number);
+    sqlite3_bind_text(stmt, bind_index++, serial_number.c_str(), -1, SQLITE_STATIC);
     rc = sqlite3_step(stmt);
 
     sqlite3_finalize(stmt);
@@ -182,7 +181,7 @@ bool DBHandler::updateDevice(const int serial_number,
 }
 
 // 5. Delete a device
-bool DBHandler::deleteDevice(const int serial_number)
+bool DBHandler::deleteDevice(const std::string &serial_number)
 {
     std::string sql = "DELETE FROM devices WHERE serial_number = ?";
 
@@ -194,7 +193,7 @@ bool DBHandler::deleteDevice(const int serial_number)
         return false;
     }
 
-    sqlite3_bind_int(stmt, 1, serial_number);
+    sqlite3_bind_text(stmt, 1, serial_number.c_str(), -1, SQLITE_STATIC);
     rc = sqlite3_step(stmt);
 
     sqlite3_finalize(stmt);
@@ -330,6 +329,29 @@ bool DBHandler::deleteLocation(const int id)
 
 // HELPER METHODS
 // public methods
+bool DBHandler::serialNumExists(std::string &serial_num)
+{
+    std::string sql = "SELECT COUNT(*) FROM devices WHERE serial_number = ?";
+    sqlite3_stmt *stmt;
+    int rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
+    if (rc != SQLITE_OK)
+    {
+        std::cerr << "Error preparing SQL statement: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    sqlite3_bind_text(stmt, 1, serial_num.c_str(), -1, SQLITE_STATIC);
+    rc = sqlite3_step(stmt);
+    int count = 0;
+    if (rc == SQLITE_ROW)
+    {
+        count = sqlite3_column_int(stmt, 0);
+    }
+
+    sqlite3_finalize(stmt);
+    return (count > 0);
+}
+
 bool DBHandler::locationExists(int location_id)
 {
     std::string sql = "SELECT COUNT(*) FROM locations WHERE id = ?";
@@ -353,33 +375,10 @@ bool DBHandler::locationExists(int location_id)
     return (count > 0);
 }
 
-bool DBHandler::serialNumExists(int serial_num)
-{
-    std::string sql = "SELECT COUNT(*) FROM devices WHERE serial_number = ?";
-    sqlite3_stmt *stmt;
-    int rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
-    if (rc != SQLITE_OK)
-    {
-        std::cerr << "Error preparing SQL statement: " << sqlite3_errmsg(db) << std::endl;
-        return false;
-    }
-
-    sqlite3_bind_int(stmt, 1, serial_num);
-    rc = sqlite3_step(stmt);
-    int count = 0;
-    if (rc == SQLITE_ROW)
-    {
-        count = sqlite3_column_int(stmt, 0);
-    }
-
-    sqlite3_finalize(stmt);
-    return (count > 0);
-}
-
 // private methods
 void DBHandler::bindDeviceData(sqlite3_stmt *stmt, const Device &device)
 {
-    sqlite3_bind_int(stmt, 1, device.serial_number);
+    sqlite3_bind_text(stmt, 1, device.serial_number.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 2, device.name.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 3, device.type.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 4, device.creation_date.c_str(), -1, SQLITE_STATIC);
@@ -389,7 +388,7 @@ void DBHandler::bindDeviceData(sqlite3_stmt *stmt, const Device &device)
 Device DBHandler::extractDeviceData(sqlite3_stmt *stmt)
 {
     Device device;
-    device.serial_number = sqlite3_column_int(stmt, 0);
+    device.serial_number = reinterpret_cast<const char *>(sqlite3_column_text(stmt, 0));
     device.name = reinterpret_cast<const char *>(sqlite3_column_text(stmt, 1));
     device.type = reinterpret_cast<const char *>(sqlite3_column_text(stmt, 2));
     device.creation_date = reinterpret_cast<const char *>(sqlite3_column_text(stmt, 3));

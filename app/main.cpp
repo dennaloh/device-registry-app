@@ -5,13 +5,12 @@
 int main()
 {
     DBHandler dbHandler("registry.db");
-    std::cout << "Before connection" << std::endl;
     if (!dbHandler.openConnection())
     {
         std::cout << "Failed to connect to database" << std::endl;
         return 1;
     }
-    std::cout << "After connection" << std::endl;
+    std::cout << "Connected to database." << std::endl;
 
     httplib::Server svr;
     DeviceHandler deviceHandler(dbHandler);

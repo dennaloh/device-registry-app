@@ -39,11 +39,9 @@ void DeviceHandler::filterDevices(const httplib::Request &req, httplib::Response
 
     const std::set<std::string> validFilters = {"serial_number", "name", "type", "creation_date", "location_id",
                                                 "start_date", "end_date", "location_name", "location_type"};
-
     bool hasValidFilter = std::any_of(validFilters.begin(), validFilters.end(),
                                       [&req](const std::string &param)
                                       { return req.has_param(param); });
-
     if (!hasValidFilter)
     {
         res.status = 400;
@@ -107,9 +105,9 @@ void DeviceHandler::addDevice(const httplib::Request &req, httplib::Response &re
 
     newDevice.name = req.get_param_value("name");
     newDevice.type = req.get_param_value("type");
-    try
+    newDevice.serial_number = req.get_param_value("serial_number");
+    if (isAlphanumeric(newDevice.serial_number))
     {
-        newDevice.serial_number = std::stoi(req.get_param_value("serial_number"));
         if (db.serialNumExists(newDevice.serial_number))
         {
             res.status = 409;
@@ -119,7 +117,7 @@ void DeviceHandler::addDevice(const httplib::Request &req, httplib::Response &re
             return;
         }
     }
-    catch (...)
+    else
     {
         res.status = 400;
         response["status"] = "invalid";
@@ -172,7 +170,7 @@ void DeviceHandler::addDevice(const httplib::Request &req, httplib::Response &re
         res.status = 200;
         response["status"] = "success";
         response["message"] = "New device created successfully: " +
-                              std::to_string(newDevice.serial_number) + " | " +
+                              newDevice.serial_number + " | " +
                               newDevice.name + " | " +
                               newDevice.type + " | " +
                               newDevice.creation_date + " | " +
@@ -203,7 +201,7 @@ void DeviceHandler::updateDevice(const httplib::Request &req, httplib::Response 
 
     std::string name = req.get_param_value("name");
     std::string type = req.get_param_value("type");
-    int serial_number = std::stoi(req.matches[1]);
+    std::string serial_number = req.matches[1];
     if (!db.serialNumExists(serial_number))
     {
         res.status = 404;
@@ -248,7 +246,7 @@ void DeviceHandler::updateDevice(const httplib::Request &req, httplib::Response 
     {
         res.status = 200;
         response["status"] = "success";
-        response["message"] = "Successfully updated device: " + std::to_string(serial_number);
+        response["message"] = "Successfully updated device: " + serial_number;
     }
     else
     {
@@ -264,7 +262,7 @@ void DeviceHandler::deleteDevice(const httplib::Request &req, httplib::Response 
 {
     json response;
 
-    int serial_number = std::stoi(req.matches[1]);
+    std::string serial_number = req.matches[1];
     if (!db.serialNumExists(serial_number))
     {
         res.status = 404;
@@ -280,7 +278,7 @@ void DeviceHandler::deleteDevice(const httplib::Request &req, httplib::Response 
     {
         res.status = 200;
         response["status"] = "success";
-        response["message"] = "Successfully deleted device " + std::to_string(serial_number);
+        response["message"] = "Successfully deleted device " + serial_number;
         res.set_content(response.dump(), "application/json");
     }
     else
@@ -325,12 +323,22 @@ bool DeviceHandler::isValidDate(const std::string &dateStr)
     std::tm timeStruct = {0};
     std::istringstream ss(dateStr);
     ss >> std::get_time(&timeStruct, "%Y-%m-%d");
-
     if (ss.fail())
     {
         return false;
     }
-
     time_t result = mktime(&timeStruct);
     return result != -1;
+}
+
+bool DeviceHandler::isAlphanumeric(const std::string &str)
+{
+    for (char c : str)
+    {
+        if (!std::isalnum(static_cast<unsigned char>(c)))
+        {
+            return false;
+        }
+    }
+    return true;
 }
