@@ -1,8 +1,8 @@
 #pragma once
 #include <sqlite3.h>
-#include <string>
-#include <iostream>
-#include <vector>
+#include "httplib.h"
+#include "json.hpp"
+using json = nlohmann::json;
 
 struct Device
 {

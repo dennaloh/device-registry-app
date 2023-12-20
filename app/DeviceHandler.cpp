@@ -277,7 +277,7 @@ void DeviceHandler::deleteDevice(const httplib::Request &req, httplib::Response 
         response["message"] = "Failed to delete device in DBHandler";
         res.set_content(response.dump(), "application/json");
     }
-};
+}
 
 void DeviceHandler::handleRequests(httplib::Server &svr)
 {
@@ -298,25 +298,17 @@ void DeviceHandler::handleRequests(httplib::Server &svr)
 }
 
 // Helper methods
-bool DeviceHandler::isValidDate(const std::string &date)
+bool DeviceHandler::isValidDate(const std::string &dateStr)
 {
-    std::regex date_regex("\\d{4}-\\d{2}-\\d{2}");
-    if (!std::regex_match(date, date_regex))
+    std::tm timeStruct = {0};
+    std::istringstream ss(dateStr);
+    ss >> std::get_time(&timeStruct, "%Y-%m-%d");
+
+    if (ss.fail())
     {
         return false;
     }
-    int year = std::stoi(date.substr(0, 4));
-    int month = std::stoi(date.substr(5, 2));
-    int day = std::stoi(date.substr(8, 2));
-    if (month < 1 || month > 12)
-    {
-        return false;
-    }
-    bool is_leap_year = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
-    int days_in_month = (month == 2 && is_leap_year) ? 29 : 28;
-    if (day < 1 || day > days_in_month)
-    {
-        return false;
-    }
-    return true;
+
+    time_t result = mktime(&timeStruct);
+    return result != -1;
 }

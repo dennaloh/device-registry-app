@@ -1,8 +1,5 @@
 #pragma once
 #include "DBHandler.h"
-#include "httplib.h"
-#include "json.hpp"
-using json = nlohmann::json;
 
 class LocationHandler
 {
