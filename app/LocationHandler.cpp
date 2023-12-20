@@ -89,6 +89,81 @@ void LocationHandler::addLocation(const httplib::Request &req, httplib::Response
     res.set_content(response.dump(), "application/json");
 }
 
+void LocationHandler::updateLocation(const httplib::Request &req, httplib::Response &res)
+{
+    json response;
+
+    if (!(req.has_param("name") || req.has_param("type")))
+    {
+        res.status = 400;
+        response["status"] = "invalid";
+        response["message"] = "Invalid request parameters: Only name &/or type";
+        res.set_content(response.dump(), "application/json");
+        return;
+    }
+
+    std::string name = req.get_param_value("name");
+    std::string type = req.get_param_value("type");
+    int id = std::stoi(req.matches[1]);
+    if (!db.locationExists(id))
+    {
+        res.status = 404;
+        response["status"] = "not found";
+        response["message"] = "Location ID does not exist in locations table";
+        res.set_content(response.dump(), "application/json");
+        return;
+    }
+
+    auto updated = db.updateLocation(id, name, type);
+
+    if (updated)
+    {
+        res.status = 200;
+        response["status"] = "success";
+        response["message"] = "Updated location successfully";
+    }
+    else
+    {
+        res.status = 500;
+        response["status"] = "error";
+        response["message"] = "Failed to update location in DBHandler";
+    }
+
+    res.set_content(response.dump(), "application/json");
+}
+
+void LocationHandler::deleteLocation(const httplib::Request &req, httplib::Response &res)
+{
+    json response;
+
+    int id = std::stoi(req.matches[1]);
+    if (!db.locationExists(id))
+    {
+        res.status = 404;
+        response["status"] = "not found";
+        response["message"] = "Location ID does not exist in locations table";
+        res.set_content(response.dump(), "application/json");
+        return;
+    }
+
+    auto deleted = db.deleteLocation(id);
+
+    if (deleted)
+    {
+        res.status = 200;
+        response["status"] = "success";
+        response["message"] = "Deleted location and devices with this location id successfully";
+        res.set_content(response.dump(), "application/json");
+    }
+    else
+    {
+        res.status = 500;
+        response["status"] = "error";
+        response["message"] = "Failed to delete location and devices with this location id in DBHandler";
+        res.set_content(response.dump(), "application/json");
+    }
+}
+
 void LocationHandler::handleRequests(httplib::Server &svr)
 {
     svr.Get("/locations", [&](const httplib::Request &req, httplib::Response &res)
@@ -96,4 +171,10 @@ void LocationHandler::handleRequests(httplib::Server &svr)
 
     svr.Post("/locations/new", [&](const httplib::Request &req, httplib::Response &res)
              { addLocation(req, res); });
+
+    svr.Put(R"(/locations/(\d+))", [&](const httplib::Request &req, httplib::Response &res)
+            { updateLocation(req, res); });
+
+    svr.Delete(R"(/locations/(\d+))", [&](const httplib::Request &req, httplib::Response &res)
+               { deleteLocation(req, res); });
 }

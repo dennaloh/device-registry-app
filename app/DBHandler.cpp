@@ -69,11 +69,84 @@ bool DBHandler::addLocation(const Location &location)
     }
 
     bindLocationData(stmt, location);
-
     rc = sqlite3_step(stmt);
 
     sqlite3_finalize(stmt);
     return (rc == SQLITE_DONE);
+}
+
+// 3. Update a location
+bool DBHandler::updateLocation(const int id, const std::string &name, const std::string &type)
+{
+    std::string sql = "UPDATE locations SET ";
+    if (!name.empty())
+    {
+        sql += "name = ?, ";
+    }
+    if (!type.empty())
+    {
+        sql += "type = ?, ";
+    }
+    sql.pop_back();
+    sql.pop_back();
+    sql += "WHERE id = ?";
+
+    sqlite3_stmt *stmt;
+    int rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
+    if (rc != SQLITE_OK)
+    {
+        std::cerr << "Error preparing SQL statement: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    int bind_index = 1;
+    if (!name.empty())
+    {
+        sqlite3_bind_text(stmt, bind_index++, name.c_str(), -1, SQLITE_STATIC);
+    }
+    if (!type.empty())
+    {
+        sqlite3_bind_text(stmt, bind_index++, type.c_str(), -1, SQLITE_STATIC);
+    }
+    sqlite3_bind_int(stmt, bind_index++, id);
+    rc = sqlite3_step(stmt);
+
+    sqlite3_finalize(stmt);
+    return (rc == SQLITE_DONE);
+}
+
+// 4. Delete a location: All devices with this location id will be deleted as well.
+bool DBHandler::deleteLocation(const int id)
+{
+    std::string sqlDevices = "DELETE FROM devices WHERE location_id = ?;";
+    sqlite3_stmt *stmtDevices;
+    int rcDevices = sqlite3_prepare_v2(db, sqlDevices.c_str(), -1, &stmtDevices, NULL);
+    if (rcDevices != SQLITE_OK)
+    {
+        std::cerr << "Error preparing SQL statement for devices: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    sqlite3_bind_int(stmtDevices, 1, id);
+    rcDevices = sqlite3_step(stmtDevices);
+
+    sqlite3_finalize(stmtDevices);
+
+    std::string sqlLocation = "DELETE FROM locations WHERE id = ?;";
+    sqlite3_stmt *stmtLocation;
+    int rcLocation = sqlite3_prepare_v2(db, sqlLocation.c_str(), -1, &stmtLocation, NULL);
+    if (rcLocation != SQLITE_OK)
+    {
+        std::cerr << "Error preparing SQL statement for locations: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    sqlite3_bind_int(stmtLocation, 1, id);
+    rcLocation = sqlite3_step(stmtLocation);
+
+    sqlite3_finalize(stmtLocation);
+
+    return (rcDevices == SQLITE_DONE && rcLocation == SQLITE_DONE);
 }
 
 // HELPER METHODS
