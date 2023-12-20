@@ -320,15 +320,32 @@ std::string DeviceHandler::getTodayDate()
 
 bool DeviceHandler::isValidDate(const std::string &dateStr)
 {
-    std::tm timeStruct = {0};
-    std::istringstream ss(dateStr);
-    ss >> std::get_time(&timeStruct, "%Y-%m-%d");
-    if (ss.fail())
+    const char *dateChar = dateStr.c_str();
+    struct std::tm tm = {0};
+    struct std::tm copy;
+    strptime(dateChar, "%Y-%m-%d", &tm);
+    copy.tm_sec = tm.tm_sec;
+    copy.tm_min = tm.tm_min;
+    copy.tm_hour = tm.tm_hour;
+    copy.tm_mday = tm.tm_mday;
+    copy.tm_mon = tm.tm_mon;
+    copy.tm_year = tm.tm_year;
+    copy.tm_wday = tm.tm_wday;
+    copy.tm_yday = tm.tm_yday;
+    copy.tm_isdst = tm.tm_isdst;
+    time_t res = mktime(&copy);
+
+    if (res < 0)
     {
+        std::cout << "Date invalid";
         return false;
     }
-    time_t result = mktime(&timeStruct);
-    return result != -1;
+    if (copy.tm_mday != tm.tm_mday || copy.tm_mon != tm.tm_mon || copy.tm_year != tm.tm_year)
+    {
+        std::cout << "Invalid date";
+        return false;
+    }
+    return true;
 }
 
 bool DeviceHandler::isAlphanumeric(const std::string &str)
