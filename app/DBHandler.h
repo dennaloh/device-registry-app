@@ -25,38 +25,38 @@ struct Location
 class DBHandler
 {
 public:
-    DBHandler(const std::string &dbPath);
+    DBHandler(const std::string &db_path);
     ~DBHandler();
-    bool openConnection();
-    void closeConnection();
+    bool open_connection();
+    void close_connection();
 
     // DEVICES TABLE OPERATIONS
-    std::vector<Device> getAllDevices();
-    std::vector<Device> filterDevices(const std::string &serial_number, const std::string &name, const std::string &type,
-                                      const std::string &creation_date, const std::string &location_id, const std::string &start_date,
-                                      const std::string &end_date, const std::string &location_name, const std::string &location_type);
-    bool addDevice(const Device &device);
-    bool updateDevice(const std::string &serial_number, const std::string &name, const std::string &type, const std::string &creation_date,
-                      const std::string &location_id);
-    bool deleteDevice(const std::string &serial_number);
+    std::vector<Device> get_devices();
+    std::vector<Device> filter_devices(const std::string &serial_number, const std::string &name, const std::string &type,
+                                       const std::string &creation_date, const std::string &location_id, const std::string &start_date,
+                                       const std::string &end_date, const std::string &location_name, const std::string &location_type);
+    bool add_device(const Device &device);
+    bool update_device(const std::string &serial_number, const std::string &name, const std::string &type, const std::string &creation_date,
+                       const std::string &location_id);
+    bool delete_device(const std::string &serial_number);
 
     // LOCATIONS TABLE OPERATIONS
-    std::vector<Location> getAllLocations();
-    bool addLocation(const Location &location);
-    bool updateLocation(const int id, const std::string &name, const std::string &type);
-    bool deleteLocation(const int id);
+    std::vector<Location> get_locations();
+    bool add_location(const Location &location);
+    bool update_location(const int id, const std::string &name, const std::string &type);
+    bool delete_location(const int id);
 
     // Helper methods
-    bool serialNumExists(std::string &serial_num);
-    bool locationExists(int location_id);
+    bool serial_num_exists(std::string &serial_num);
+    bool location_exists(int location_id);
 
 private:
     sqlite3 *db;
     std::string dbPath;
 
     // Helper methods
-    void bindDeviceData(sqlite3_stmt *stmt, const Device &device);
-    Device extractDeviceData(sqlite3_stmt *stmt);
-    void bindLocationData(sqlite3_stmt *stmt, const Location &location);
-    Location extractLocationData(sqlite3_stmt *stmt);
+    void bind_device_data(sqlite3_stmt *stmt, const Device &device);
+    Device extract_device_data(sqlite3_stmt *stmt);
+    void bind_location_data(sqlite3_stmt *stmt, const Location &location);
+    Location extract_location_data(sqlite3_stmt *stmt);
 };

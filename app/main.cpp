@@ -5,7 +5,7 @@
 int main()
 {
     DBHandler dbHandler("registry.db");
-    if (!dbHandler.openConnection())
+    if (!dbHandler.open_connection())
     {
         std::cout << "Failed to connect to database" << std::endl;
         return 1;
@@ -16,11 +16,11 @@ int main()
     DeviceHandler deviceHandler(dbHandler);
     LocationHandler locationHandler(dbHandler);
 
-    deviceHandler.handleRequests(svr);
-    locationHandler.handleRequests(svr);
+    deviceHandler.handle_requests(svr);
+    locationHandler.handle_requests(svr);
 
     svr.listen("0.0.0.0", 8080);
 
-    dbHandler.closeConnection();
+    dbHandler.close_connection();
     return 0;
 }

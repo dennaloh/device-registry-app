@@ -1,19 +1,19 @@
 #include "DBHandler.h"
 
-DBHandler::DBHandler(const std::string &dbPath) : db(nullptr), dbPath(dbPath) {}
+DBHandler::DBHandler(const std::string &db_path) : db(nullptr), dbPath(db_path) {}
 
 DBHandler::~DBHandler()
 {
-    closeConnection();
+    close_connection();
 }
 
-bool DBHandler::openConnection()
+bool DBHandler::open_connection()
 {
     int rc = sqlite3_open(dbPath.c_str(), &db);
     return (rc == SQLITE_OK);
 }
 
-void DBHandler::closeConnection()
+void DBHandler::close_connection()
 {
     if (db)
     {
@@ -24,7 +24,7 @@ void DBHandler::closeConnection()
 
 // DEVICES TABLE OPERATIONS
 // 1. List all devices
-std::vector<Device> DBHandler::getAllDevices()
+std::vector<Device> DBHandler::get_devices()
 {
     std::string sql = "SELECT devices.serial_number, devices.name, devices.type, devices.creation_date, devices.location_id, locations.name, locations.type"
                       " FROM devices INNER JOIN locations ON devices.location_id = locations.id ";
@@ -40,7 +40,7 @@ std::vector<Device> DBHandler::getAllDevices()
 
     while (sqlite3_step(stmt) == SQLITE_ROW)
     {
-        Device device = extractDeviceData(stmt);
+        Device device = extract_device_data(stmt);
         devices.push_back(device);
     }
 
@@ -49,9 +49,9 @@ std::vector<Device> DBHandler::getAllDevices()
 }
 
 // 2. Filter by metadata: Only serial_number, name, type, creation_date, location_id, start_date, end_date, location_name, location_type.
-std::vector<Device> DBHandler::filterDevices(const std::string &serial_number, const std::string &name, const std::string &type,
-                                             const std::string &creation_date, const std::string &location_id, const std::string &start_date,
-                                             const std::string &end_date, const std::string &location_name, const std::string &location_type)
+std::vector<Device> DBHandler::filter_devices(const std::string &serial_number, const std::string &name, const std::string &type,
+                                              const std::string &creation_date, const std::string &location_id, const std::string &start_date,
+                                              const std::string &end_date, const std::string &location_name, const std::string &location_type)
 {
     std::string sql = "SELECT devices.serial_number, devices.name, devices.type, devices.creation_date, devices.location_id, locations.name, locations.type"
                       " FROM devices INNER JOIN locations ON devices.location_id = locations.id "
@@ -96,7 +96,7 @@ std::vector<Device> DBHandler::filterDevices(const std::string &serial_number, c
 
     while (sqlite3_step(stmt) == SQLITE_ROW)
     {
-        Device device = extractDeviceData(stmt);
+        Device device = extract_device_data(stmt);
         filtered_devices.push_back(device);
     }
 
@@ -105,7 +105,7 @@ std::vector<Device> DBHandler::filterDevices(const std::string &serial_number, c
 }
 
 // 3. Add new device
-bool DBHandler::addDevice(const Device &device)
+bool DBHandler::add_device(const Device &device)
 {
     std::string sql = "INSERT INTO devices (serial_number, name, type, creation_date, location_id) VALUES (?, ?, ?, ?, ?)";
 
@@ -117,7 +117,7 @@ bool DBHandler::addDevice(const Device &device)
         return false;
     }
 
-    bindDeviceData(stmt, device);
+    bind_device_data(stmt, device);
     rc = sqlite3_step(stmt);
 
     sqlite3_finalize(stmt);
@@ -125,7 +125,7 @@ bool DBHandler::addDevice(const Device &device)
 }
 
 // 4. Update a device: Must be integer serial number. To update serial number, need to delete and post again.
-bool DBHandler::updateDevice(const std::string &serial_number, const std::string &name, const std::string &type, const std::string &creation_date, const std::string &location_id)
+bool DBHandler::update_device(const std::string &serial_number, const std::string &name, const std::string &type, const std::string &creation_date, const std::string &location_id)
 {
     std::string sql = "UPDATE devices SET ";
     if (!name.empty())
@@ -181,7 +181,7 @@ bool DBHandler::updateDevice(const std::string &serial_number, const std::string
 }
 
 // 5. Delete a device
-bool DBHandler::deleteDevice(const std::string &serial_number)
+bool DBHandler::delete_device(const std::string &serial_number)
 {
     std::string sql = "DELETE FROM devices WHERE serial_number = ?";
 
@@ -202,7 +202,7 @@ bool DBHandler::deleteDevice(const std::string &serial_number)
 
 // LOCATIONS TABLE OPERATIONS
 // 1. List all locations
-std::vector<Location> DBHandler::getAllLocations()
+std::vector<Location> DBHandler::get_locations()
 {
     std::string sql = "SELECT * FROM locations";
 
@@ -217,7 +217,7 @@ std::vector<Location> DBHandler::getAllLocations()
 
     while (sqlite3_step(stmt) == SQLITE_ROW)
     {
-        Location location = extractLocationData(stmt);
+        Location location = extract_location_data(stmt);
         locations.push_back(location);
     }
 
@@ -226,7 +226,7 @@ std::vector<Location> DBHandler::getAllLocations()
 }
 
 // 2. Add new location
-bool DBHandler::addLocation(const Location &location)
+bool DBHandler::add_location(const Location &location)
 {
     std::string sql;
     if (location.id == -1)
@@ -246,7 +246,7 @@ bool DBHandler::addLocation(const Location &location)
         return false;
     }
 
-    bindLocationData(stmt, location);
+    bind_location_data(stmt, location);
     rc = sqlite3_step(stmt);
 
     sqlite3_finalize(stmt);
@@ -254,7 +254,7 @@ bool DBHandler::addLocation(const Location &location)
 }
 
 // 3. Update a location
-bool DBHandler::updateLocation(const int id, const std::string &name, const std::string &type)
+bool DBHandler::update_location(const int id, const std::string &name, const std::string &type)
 {
     std::string sql = "UPDATE locations SET ";
     if (!name.empty())
@@ -294,42 +294,38 @@ bool DBHandler::updateLocation(const int id, const std::string &name, const std:
 }
 
 // 4. Delete a location: All devices with this location id will be deleted as well.
-bool DBHandler::deleteLocation(const int id)
+bool DBHandler::delete_location(const int id)
 {
-    std::string sqlDevices = "DELETE FROM devices WHERE location_id = ?;";
-    sqlite3_stmt *stmtDevices;
-    int rcDevices = sqlite3_prepare_v2(db, sqlDevices.c_str(), -1, &stmtDevices, NULL);
+    std::string sql_devices = "DELETE FROM devices WHERE location_id = ?;";
+    sqlite3_stmt *stmt_devices;
+    int rcDevices = sqlite3_prepare_v2(db, sql_devices.c_str(), -1, &stmt_devices, NULL);
     if (rcDevices != SQLITE_OK)
     {
         std::cerr << "Error preparing SQL statement for devices: " << sqlite3_errmsg(db) << std::endl;
         return false;
     }
+    sqlite3_bind_int(stmt_devices, 1, id);
+    rcDevices = sqlite3_step(stmt_devices);
+    sqlite3_finalize(stmt_devices);
 
-    sqlite3_bind_int(stmtDevices, 1, id);
-    rcDevices = sqlite3_step(stmtDevices);
-
-    sqlite3_finalize(stmtDevices);
-
-    std::string sqlLocation = "DELETE FROM locations WHERE id = ?;";
-    sqlite3_stmt *stmtLocation;
-    int rcLocation = sqlite3_prepare_v2(db, sqlLocation.c_str(), -1, &stmtLocation, NULL);
+    std::string sql_location = "DELETE FROM locations WHERE id = ?;";
+    sqlite3_stmt *stmt_location;
+    int rcLocation = sqlite3_prepare_v2(db, sql_location.c_str(), -1, &stmt_location, NULL);
     if (rcLocation != SQLITE_OK)
     {
         std::cerr << "Error preparing SQL statement for locations: " << sqlite3_errmsg(db) << std::endl;
         return false;
     }
-
-    sqlite3_bind_int(stmtLocation, 1, id);
-    rcLocation = sqlite3_step(stmtLocation);
-
-    sqlite3_finalize(stmtLocation);
+    sqlite3_bind_int(stmt_location, 1, id);
+    rcLocation = sqlite3_step(stmt_location);
+    sqlite3_finalize(stmt_location);
 
     return (rcDevices == SQLITE_DONE && rcLocation == SQLITE_DONE);
 }
 
 // HELPER METHODS
 // public methods
-bool DBHandler::serialNumExists(std::string &serial_num)
+bool DBHandler::serial_num_exists(std::string &serial_num)
 {
     std::string sql = "SELECT COUNT(*) FROM devices WHERE serial_number = ?";
     sqlite3_stmt *stmt;
@@ -352,7 +348,7 @@ bool DBHandler::serialNumExists(std::string &serial_num)
     return (count > 0);
 }
 
-bool DBHandler::locationExists(int location_id)
+bool DBHandler::location_exists(int location_id)
 {
     std::string sql = "SELECT COUNT(*) FROM locations WHERE id = ?";
     sqlite3_stmt *stmt;
@@ -376,7 +372,7 @@ bool DBHandler::locationExists(int location_id)
 }
 
 // private methods
-void DBHandler::bindDeviceData(sqlite3_stmt *stmt, const Device &device)
+void DBHandler::bind_device_data(sqlite3_stmt *stmt, const Device &device)
 {
     sqlite3_bind_text(stmt, 1, device.serial_number.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 2, device.name.c_str(), -1, SQLITE_STATIC);
@@ -385,7 +381,7 @@ void DBHandler::bindDeviceData(sqlite3_stmt *stmt, const Device &device)
     sqlite3_bind_int(stmt, 5, device.location_id);
 }
 
-Device DBHandler::extractDeviceData(sqlite3_stmt *stmt)
+Device DBHandler::extract_device_data(sqlite3_stmt *stmt)
 {
     Device device;
     device.serial_number = reinterpret_cast<const char *>(sqlite3_column_text(stmt, 0));
@@ -398,20 +394,18 @@ Device DBHandler::extractDeviceData(sqlite3_stmt *stmt)
     return device;
 }
 
-void DBHandler::bindLocationData(sqlite3_stmt *stmt, const Location &location)
+void DBHandler::bind_location_data(sqlite3_stmt *stmt, const Location &location)
 {
     int parameterIndex = 1;
-
     if (location.id != -1)
     {
         sqlite3_bind_int(stmt, parameterIndex++, location.id);
     }
-
     sqlite3_bind_text(stmt, parameterIndex++, location.name.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, parameterIndex, location.type.c_str(), -1, SQLITE_STATIC);
 }
 
-Location DBHandler::extractLocationData(sqlite3_stmt *stmt)
+Location DBHandler::extract_location_data(sqlite3_stmt *stmt)
 {
     Location location;
     location.id = sqlite3_column_int(stmt, 0);

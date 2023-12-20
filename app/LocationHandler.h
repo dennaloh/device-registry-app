@@ -6,7 +6,7 @@ class LocationHandler
 public:
     explicit LocationHandler(DBHandler &dbHandler);
 
-    void handleRequests(httplib::Server &svr);
+    void handle_requests(httplib::Server &svr);
 
 private:
     DBHandler &db;

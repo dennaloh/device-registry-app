@@ -2,10 +2,10 @@
 
 DeviceHandler::DeviceHandler(DBHandler &dbHandler) : db(dbHandler) {}
 
-void DeviceHandler::listDevices(const httplib::Request &req, httplib::Response &res)
+void DeviceHandler::list_devices(const httplib::Request &req, httplib::Response &res)
 {
     json response;
-    auto devices = db.getAllDevices();
+    auto devices = db.get_devices();
 
     if (devices.empty())
     {
@@ -33,7 +33,7 @@ void DeviceHandler::listDevices(const httplib::Request &req, httplib::Response &
     res.set_content(response_content.dump(), "application/json");
 }
 
-void DeviceHandler::filterDevices(const httplib::Request &req, httplib::Response &res)
+void DeviceHandler::filter_devices(const httplib::Request &req, httplib::Response &res)
 {
     json response;
 
@@ -61,7 +61,7 @@ void DeviceHandler::filterDevices(const httplib::Request &req, httplib::Response
     std::string location_name = req.get_param_value("location_name");
     std::string location_type = req.get_param_value("location_type");
 
-    auto filtered_devices = db.filterDevices(serial_number, name, type, creation_date, location_id_str, start_date, end_date, location_name, location_type);
+    auto filtered_devices = db.filter_devices(serial_number, name, type, creation_date, location_id_str, start_date, end_date, location_name, location_type);
 
     if (filtered_devices.empty())
     {
@@ -89,7 +89,7 @@ void DeviceHandler::filterDevices(const httplib::Request &req, httplib::Response
     res.set_content(response.dump(), "application/json");
 }
 
-void DeviceHandler::addDevice(const httplib::Request &req, httplib::Response &res)
+void DeviceHandler::add_device(const httplib::Request &req, httplib::Response &res)
 {
     Device newDevice;
     json response;
@@ -106,9 +106,9 @@ void DeviceHandler::addDevice(const httplib::Request &req, httplib::Response &re
     newDevice.name = req.get_param_value("name");
     newDevice.type = req.get_param_value("type");
     newDevice.serial_number = req.get_param_value("serial_number");
-    if (isAlphanumeric(newDevice.serial_number))
+    if (is_alphanumeric(newDevice.serial_number))
     {
-        if (db.serialNumExists(newDevice.serial_number))
+        if (db.serial_num_exists(newDevice.serial_number))
         {
             res.status = 409;
             response["status"] = "conflict";
@@ -128,7 +128,7 @@ void DeviceHandler::addDevice(const httplib::Request &req, httplib::Response &re
     try
     {
         newDevice.location_id = std::stoi(req.get_param_value("location_id"));
-        if (!db.locationExists(newDevice.location_id))
+        if (!db.location_exists(newDevice.location_id))
         {
             res.status = 404;
             response["status"] = "not found";
@@ -149,7 +149,7 @@ void DeviceHandler::addDevice(const httplib::Request &req, httplib::Response &re
     if (req.has_param("creation_date"))
     {
         newDevice.creation_date = req.get_param_value("creation_date");
-        if (!isValidDate(newDevice.creation_date))
+        if (!is_valid_date(newDevice.creation_date))
         {
             res.status = 400;
             response["status"] = "invalid";
@@ -160,10 +160,10 @@ void DeviceHandler::addDevice(const httplib::Request &req, httplib::Response &re
     }
     else
     {
-        newDevice.creation_date = getTodayDate();
+        newDevice.creation_date = get_today_date();
     }
 
-    auto added = db.addDevice(newDevice);
+    auto added = db.add_device(newDevice);
 
     if (added)
     {
@@ -186,7 +186,7 @@ void DeviceHandler::addDevice(const httplib::Request &req, httplib::Response &re
     res.set_content(response.dump(), "application/json");
 }
 
-void DeviceHandler::updateDevice(const httplib::Request &req, httplib::Response &res)
+void DeviceHandler::update_device(const httplib::Request &req, httplib::Response &res)
 {
     json response;
 
@@ -202,7 +202,7 @@ void DeviceHandler::updateDevice(const httplib::Request &req, httplib::Response 
     std::string name = req.get_param_value("name");
     std::string type = req.get_param_value("type");
     std::string serial_number = req.matches[1];
-    if (!db.serialNumExists(serial_number))
+    if (!db.serial_num_exists(serial_number))
     {
         res.status = 404;
         response["status"] = "not found";
@@ -211,7 +211,7 @@ void DeviceHandler::updateDevice(const httplib::Request &req, httplib::Response 
         return;
     }
     std::string creation_date = req.get_param_value("creation_date");
-    if (!creation_date.empty() && !isValidDate(creation_date))
+    if (!creation_date.empty() && !is_valid_date(creation_date))
     {
         res.status = 400;
         response["status"] = "invalid";
@@ -222,7 +222,7 @@ void DeviceHandler::updateDevice(const httplib::Request &req, httplib::Response 
     std::string location_id = req.get_param_value("location_id");
     try
     {
-        if (!location_id.empty() && !db.locationExists(std::stoi(location_id)))
+        if (!location_id.empty() && !db.location_exists(std::stoi(location_id)))
         {
             res.status = 404;
             response["status"] = "not found";
@@ -240,7 +240,7 @@ void DeviceHandler::updateDevice(const httplib::Request &req, httplib::Response 
         return;
     }
 
-    auto updated = db.updateDevice(serial_number, name, type, creation_date, location_id);
+    auto updated = db.update_device(serial_number, name, type, creation_date, location_id);
 
     if (updated)
     {
@@ -258,12 +258,12 @@ void DeviceHandler::updateDevice(const httplib::Request &req, httplib::Response 
     res.set_content(response.dump(), "application/json");
 }
 
-void DeviceHandler::deleteDevice(const httplib::Request &req, httplib::Response &res)
+void DeviceHandler::delete_device(const httplib::Request &req, httplib::Response &res)
 {
     json response;
 
     std::string serial_number = req.matches[1];
-    if (!db.serialNumExists(serial_number))
+    if (!db.serial_num_exists(serial_number))
     {
         res.status = 404;
         response["status"] = "not found";
@@ -272,7 +272,7 @@ void DeviceHandler::deleteDevice(const httplib::Request &req, httplib::Response 
         return;
     }
 
-    auto deleted = db.deleteDevice(serial_number);
+    auto deleted = db.delete_device(serial_number);
 
     if (deleted)
     {
@@ -290,26 +290,26 @@ void DeviceHandler::deleteDevice(const httplib::Request &req, httplib::Response 
     }
 };
 
-void DeviceHandler::handleRequests(httplib::Server &svr)
+void DeviceHandler::handle_requests(httplib::Server &svr)
 {
     svr.Get("/devices", [&](const httplib::Request &req, httplib::Response &res)
-            { listDevices(req, res); });
+            { list_devices(req, res); });
 
     svr.Get("/devices/filter", [&](const httplib::Request &req, httplib::Response &res)
-            { filterDevices(req, res); });
+            { filter_devices(req, res); });
 
     svr.Post("/devices", [&](const httplib::Request &req, httplib::Response &res)
-             { addDevice(req, res); });
+             { add_device(req, res); });
 
     svr.Patch(R"(/devices/(\d+))", [&](const httplib::Request &req, httplib::Response &res)
-              { updateDevice(req, res); });
+              { update_device(req, res); });
 
     svr.Delete(R"(/devices/(\d+))", [&](const httplib::Request &req, httplib::Response &res)
-               { deleteDevice(req, res); });
+               { delete_device(req, res); });
 }
 
 // Helper methods
-std::string DeviceHandler::getTodayDate()
+std::string DeviceHandler::get_today_date()
 {
     auto now = std::chrono::system_clock::now();
     auto now_c = std::chrono::system_clock::to_time_t(now);
@@ -318,7 +318,7 @@ std::string DeviceHandler::getTodayDate()
     return ss.str();
 }
 
-bool DeviceHandler::isValidDate(const std::string &dateStr)
+bool DeviceHandler::is_valid_date(const std::string &dateStr)
 {
     const char *dateChar = dateStr.c_str();
     struct std::tm tm = {0};
@@ -334,7 +334,6 @@ bool DeviceHandler::isValidDate(const std::string &dateStr)
     copy.tm_yday = tm.tm_yday;
     copy.tm_isdst = tm.tm_isdst;
     time_t res = mktime(&copy);
-
     if (res < 0)
     {
         std::cout << "Date invalid";
@@ -348,7 +347,7 @@ bool DeviceHandler::isValidDate(const std::string &dateStr)
     return true;
 }
 
-bool DeviceHandler::isAlphanumeric(const std::string &str)
+bool DeviceHandler::is_alphanumeric(const std::string &str)
 {
     for (char c : str)
     {
