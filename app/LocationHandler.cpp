@@ -77,10 +77,7 @@ void LocationHandler::add_location(const httplib::Request &req, httplib::Respons
     {
         res.status = 200;
         response["status"] = "success";
-        response["message"] = "New location created successfully: " +
-                              std::to_string(newLocation.id) + " | " +
-                              newLocation.name + " | " +
-                              newLocation.type;
+        response["message"] = "New location created successfully: " + newLocation.name + " | " + newLocation.type;
     }
     else
     {

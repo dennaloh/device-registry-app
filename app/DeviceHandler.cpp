@@ -301,10 +301,10 @@ void DeviceHandler::handle_requests(httplib::Server &svr)
     svr.Post("/devices", [&](const httplib::Request &req, httplib::Response &res)
              { add_device(req, res); });
 
-    svr.Patch(R"(/devices/(\d+))", [&](const httplib::Request &req, httplib::Response &res)
+    svr.Patch(R"(/devices/([^/]+))", [&](const httplib::Request &req, httplib::Response &res)
               { update_device(req, res); });
 
-    svr.Delete(R"(/devices/(\d+))", [&](const httplib::Request &req, httplib::Response &res)
+    svr.Delete(R"(/devices/([^/]+))", [&](const httplib::Request &req, httplib::Response &res)
                { delete_device(req, res); });
 }
 

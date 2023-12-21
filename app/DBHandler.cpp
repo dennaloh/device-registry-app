@@ -124,7 +124,7 @@ bool DBHandler::add_device(const Device &device)
     return (rc == SQLITE_DONE);
 }
 
-// 4. Update a device: Must be integer serial number. To update serial number, need to delete and post again.
+// 4. Update a device: Must be string serial number. To update serial number, need to delete and post again.
 bool DBHandler::update_device(const std::string &serial_number, const std::string &name, const std::string &type, const std::string &creation_date, const std::string &location_id)
 {
     std::string sql = "UPDATE devices SET ";
@@ -146,7 +146,7 @@ bool DBHandler::update_device(const std::string &serial_number, const std::strin
     }
     sql.pop_back();
     sql.pop_back();
-    sql += "WHERE serial_number = ?";
+    sql += " WHERE serial_number = ?";
 
     sqlite3_stmt *stmt;
     int rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
