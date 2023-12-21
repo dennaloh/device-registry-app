@@ -152,7 +152,7 @@ void LocationHandler::delete_location(const httplib::Request &req, httplib::Resp
     {
         res.status = 200;
         response["status"] = "success";
-        response["message"] = "Successfully deleted location and devices with location id " + std::to_string(id);
+        response["message"] = "Successfully deleted location and devices with location id: " + std::to_string(id);
         res.set_content(response.dump(), "application/json");
     }
     else

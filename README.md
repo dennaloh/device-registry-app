@@ -17,3 +17,10 @@ docker run -p 8080:8080 my-cpp-app
 ```
 http://localhost:8080/
 ```
+
+## Documentation
+Documentation of the REST API is in:
+- `device_registry_spec.md`: only success reponses
+- `device_registry_spec.yaml`: includes the different error responses
+
+Documentation of database structure is in `DatabaseStructure.md`.

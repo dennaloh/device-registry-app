@@ -278,7 +278,7 @@ void DeviceHandler::delete_device(const httplib::Request &req, httplib::Response
     {
         res.status = 200;
         response["status"] = "success";
-        response["message"] = "Successfully deleted device " + serial_number;
+        response["message"] = "Successfully deleted device: " + serial_number;
         res.set_content(response.dump(), "application/json");
     }
     else

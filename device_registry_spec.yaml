@@ -103,7 +103,7 @@ paths:
             application/json:
               example:
                 status: "success"
-                message: "New location created successfully: location A | type A"
+                message: "New location created successfully: LocationA | LocationTypeA"
         400:
           description: Invalid request
           content:
@@ -137,7 +137,7 @@ paths:
       description: |
         Example Request URL: `http://localhost:8080/locations/1?name=LocationA&type=LocationTypeA`
 
-        At least 'name' or 'type' parameter must be indicated.
+        At least one of these parameters must be indicated.
 
       parameters:
         - in: path
@@ -208,7 +208,7 @@ paths:
             application/json:
               example:
                 status: "success"
-                message: "Successfully deleted location and devices with location id 1"
+                message: "Successfully deleted location and devices with location id: 1"
         404:
           description: Location not found
           content:
@@ -262,7 +262,7 @@ paths:
     post:
       summary: Add a new device
       description: |
-        Example Request URL: `http://localhost:8080/devices/new?serial_number=12345&name=DeviceA&type=TypeA&location_id=1`
+        Example Request URL: `http://localhost:8080/devices?serial_number=12345&name=DeviceA&type=TypeA&location_id=1`
       parameters:
         - in: query
           name: serial_number
@@ -349,9 +349,9 @@ paths:
     get:
       summary: Filter devices by metadata
       description: |
-        Example Request URL: `http://localhost:8080/devices/filter?location_id=1&start_date=2023-08-08&end_date=2023-12-31`
+        Example Request URL: `http://localhost:8080/devices/filter?start_date=2023-01-01&end_date=2023-03-31`
 
-        At least 'serial_number' or 'name' or 'type' or 'creation_date' or 'location_id' or 'start_date' or 'end_date' or 'location_name' or 'location_type' parameter must be indicated.
+        At least one of these parameters must be indicated.
 
       parameters:
         - in: query
@@ -451,7 +451,7 @@ paths:
       description: |
         Example Request URL: `http://localhost:8080/devices/1?name=DeviceA&creation_date=2023-07-30`
 
-        At least 'name' or 'type' or 'creation_date' or 'location_id' parameter must be indicated.
+        At least one of these parameters must be indicated.
 
       parameters:
         - in: path
@@ -548,7 +548,7 @@ paths:
             application/json:
               example:
                 status: "success"
-                message: "Successfully deleted device 1"
+                message: "Successfully deleted device: 1"
         404:
           description: Device not found
           content:
