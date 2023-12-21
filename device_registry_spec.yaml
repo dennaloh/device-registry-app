@@ -1,4 +1,3 @@
-
 "openapi": "3.0.0"
 "info":
   "title": "Location API"
@@ -70,12 +69,10 @@
                     - "name"
                     - "type"
               "example":
-                -
-                  "id": 1
+                - "id": 1
                   "name": "Location A"
                   "type": "Type A"
-                -
-                  "id": 2
+                - "id": 2
                   "name": "Location B"
                   "type": "Type B"
         "404":
@@ -89,22 +86,19 @@
       "summary": "Add a new location"
       "description": "Example Request URL: `http://localhost:8080/locations?name=LocationA&type=LocationTypeA`\n"
       "parameters":
-        -
-          "in": "query"
+        - "in": "query"
           "name": "id"
           "required": false
           "description": "location ID"
           "schema":
             "type": "integer"
-        -
-          "in": "query"
+        - "in": "query"
           "name": "name"
           "required": true
           "description": "location name"
           "schema":
             "type": "string"
-        -
-          "in": "query"
+        - "in": "query"
           "name": "type"
           "required": true
           "description": "location type"
@@ -150,22 +144,19 @@
       "summary": "Update a location by ID"
       "description": "Example Request URL: `http://localhost:8080/locations/1?name=LocationA&type=LocationTypeA`\n\nAt least 'name' or 'type' parameter must be indicated.\n"
       "parameters":
-        -
-          "in": "path"
+        - "in": "path"
           "name": "id"
           "required": true
           "description": "location ID"
           "schema":
             "type": "integer"
-        -
-          "in": "query"
+        - "in": "query"
           "name": "name"
           "required": false
           "description": "location name"
           "schema":
             "type": "string"
-        -
-          "in": "query"
+        - "in": "query"
           "name": "type"
           "required": false
           "description": "location type"
@@ -204,8 +195,7 @@
       "summary": "Delete a location by ID"
       "description": "Example Request URL: `http://localhost:8080/locations/1`\n\nAll devices with this location ID will also be deleted.\n"
       "parameters":
-        -
-          "in": "path"
+        - "in": "path"
           "name": "id"
           "required": true
           "description": "location ID"
@@ -268,16 +258,14 @@
                     - "type"
                     - "location_id"
               "example":
-                -
-                  "serial_number": "12345"
+                - "serial_number": "12345"
                   "name": "Device A"
                   "type": "Type A"
                   "creation_date": "2023-01-15"
                   "location_id": 1
                   "location_name": "Location X"
                   "location_type": "Type X"
-                -
-                  "serial_number": "67890"
+                - "serial_number": "67890"
                   "name": "Device B"
                   "type": "Type B"
                   "creation_date": "2023-02-20"
@@ -295,37 +283,32 @@
       "summary": "Add a new device"
       "description": "Example Request URL: `http://localhost:8080/devices/new?serial_number=12345&name=DeviceA&type=TypeA&location_id=1`\n"
       "parameters":
-        -
-          "in": "query"
+        - "in": "query"
           "name": "serial_number"
           "required": true
           "description": "device serial number"
           "schema":
             "type": "string"
-        -
-          "in": "query"
+        - "in": "query"
           "name": "name"
           "required": true
           "description": "device name"
           "schema":
             "type": "string"
-        -
-          "in": "query"
+        - "in": "query"
           "name": "type"
           "required": true
           "description": "device type"
           "schema":
             "type": "string"
-        -
-          "in": "query"
+        - "in": "query"
           "name": "creation_date"
           "required": false
           "description": "date of creation of row in devices table"
           "schema":
             "type": "string"
             "format": "date"
-        -
-          "in": "query"
+        - "in": "query"
           "name": "location_id"
           "required": true
           "description": "ID of the device's location from the locations table"
@@ -386,67 +369,58 @@
       "summary": "Filter devices by metadata"
       "description": "Example Request URL: `http://localhost:8080/devices/filter?location_id=1&start_date=2023-08-08&end_date=2023-12-31`\n\nAt lease 'serial_number' or 'name' or 'type' or 'creation_date' or 'location_id' or 'start_date' or 'end_date' or 'location_name' or 'location_type' parameter must be indicated.\n"
       "parameters":
-        -
-          "in": "query"
+        - "in": "query"
           "name": "serial_number"
           "required": false
           "description": "device serial number"
           "schema":
             "type": "string"
-        -
-          "in": "query"
+        - "in": "query"
           "name": "name"
           "required": false
           "description": "device name"
           "schema":
             "type": "string"
-        -
-          "in": "query"
+        - "in": "query"
           "name": "type"
           "required": false
           "description": "device type"
           "schema":
             "type": "string"
-        -
-          "in": "query"
+        - "in": "query"
           "name": "creation_date"
           "required": false
           "description": "date of creation of row in devices table"
           "schema":
             "type": "string"
             "format": "date"
-        -
-          "in": "query"
+        - "in": "query"
           "name": "location_id"
           "required": false
           "description": "location ID"
           "schema":
             "type": "integer"
-        -
-          "in": "query"
+        - "in": "query"
           "name": "start_date"
           "required": false
           "description": "start date for filtering creation dates from this date onwards"
           "schema":
             "type": "string"
             "format": "date"
-        -
-          "in": "query"
+        - "in": "query"
           "name": "end_date"
           "required": false
           "description": "end date for filtering creation dates until this date"
           "schema":
             "type": "string"
             "format": "date"
-        -
-          "in": "query"
+        - "in": "query"
           "name": "location_name"
           "required": false
           "description": "location name"
           "schema":
             "type": "string"
-        -
-          "in": "query"
+        - "in": "query"
           "name": "location_type"
           "required": false
           "description": "location type"
@@ -483,14 +457,12 @@
                     - "type"
                     - "location_id"
               "example":
-                -
-                  "serial_number": "12345"
+                - "serial_number": "12345"
                   "name": "Device A"
                   "type": "Type A"
                   "creation_date": "2023-01-15"
                   "location_id": 1
-                -
-                  "serial_number": "67890"
+                - "serial_number": "67890"
                   "name": "Device B"
                   "type": "Type B"
                   "creation_date": "2023-02-20"
@@ -514,37 +486,32 @@
       "summary": "Update a device by serial number"
       "description": "Example Request URL: `http://localhost:8080/devices/1?name=DeviceA&creation_date=2023-07-30`\n\nAt least 'name' or 'type' or 'creation_date' or 'location_id' parameter must be indicated.\n"
       "parameters":
-        -
-          "in": "path"
+        - "in": "path"
           "name": "serial_number"
           "required": true
           "description": "device serial number"
           "schema":
             "type": "string"
-        -
-          "in": "query"
+        - "in": "query"
           "name": "name"
           "required": false
           "description": "device name"
           "schema":
             "type": "string"
-        -
-          "in": "query"
+        - "in": "query"
           "name": "type"
           "required": false
           "description": "device type"
           "schema":
             "type": "string"
-        -
-          "in": "query"
+        - "in": "query"
           "name": "creation_date"
           "required": false
           "description": "date of creation of row in devices table"
           "schema":
             "type": "string"
             "format": "date"
-        -
-          "in": "query"
+        - "in": "query"
           "name": "location_id"
           "required": false
           "description": "ID of the device's location from the locations table"
@@ -599,8 +566,7 @@
       "summary": "Delete a device by serial number"
       "description": "Example Request URL: `http://localhost:8080/devices/1`\n"
       "parameters":
-        -
-          "in": "path"
+        - "in": "path"
           "name": "serial_number"
           "required": true
           "description": "device serial number"
