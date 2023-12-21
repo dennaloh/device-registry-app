@@ -1,6 +1,6 @@
 # Device Registry REST API
 
-The REST API manages devices and locations and provides endpoints for listing, filtering, adding, updating, and deleting devices and locations.
+The REST API manages devices and locations, and provides endpoints for listing, filtering, adding, updating, and deleting devices and locations.
 
 ## GET /devices
 - **Description**: retrieves a list of all devices
@@ -16,22 +16,22 @@ http://localhost:8080/devices
   ```json
   [
     {
-      "serial_number": "ABC123",
-      "name": "Device 1",
-      "type": "Type A",
-      "creation_date": "2023-01-15",
-      "location_id": 1,
-      "location_name": "Location X",
-      "location_type": "Location Type X"
+        "creation_date": "2023-12-13",
+        "location_id": 2,
+        "location_name": "LocationB",
+        "location_type": "LocationTypeB",
+        "name": "DeviceB",
+        "serial_number": "1a",
+        "type": "TypeB"
     },
     {
-      "serial_number": "DEF456",
-      "name": "Device 2",
-      "type": "Type B",
-      "creation_date": "2023-03-20",
-      "location_id": 2,
-      "location_name": "Location Y",
-      "location_type": "Location Type Y"
+        "creation_date": "2023-12-14",
+        "location_id": 3,
+        "location_name": "location c",
+        "location_type": "location type c",
+        "name": "device c",
+        "serial_number": "1ab",
+        "type": "type c"
     },
     ...
   ]
@@ -63,29 +63,29 @@ At least one of these parameters must be indicated:
 ### Request
 #### Example
 ```
-http://localhost:8080/devices/filter?start_date=2023-01-01&end_date=2023-03-31
+http://localhost:8080/devices/filter?start_date=2023-12-13&end_date=2023-12-14
 ```
 ### Response
 #### Example
   ```json
   [
     {
-      "serial_number": "ABC123",
-      "name": "Device 1",
-      "type": "Type A",
-      "creation_date": "2023-01-15",
-      "location_id": 1,
-      "location_name": "Location X",
-      "location_type": "Location Type X"
+        "creation_date": "2023-12-13",
+        "location_id": 2,
+        "location_name": "LocationB",
+        "location_type": "LocationTypeB",
+        "name": "DeviceB",
+        "serial_number": "1a",
+        "type": "TypeB"
     },
     {
-      "serial_number": "DEF456",
-      "name": "Device 2",
-      "type": "Type B",
-      "creation_date": "2023-03-20",
-      "location_id": 2,
-      "location_name": "Location Y",
-      "location_type": "Location Type Y"
+        "creation_date": "2023-12-14",
+        "location_id": 3,
+        "location_name": "location c",
+        "location_type": "location type c",
+        "name": "device c",
+        "serial_number": "1ab",
+        "type": "type c"
     },
     ...
   ]

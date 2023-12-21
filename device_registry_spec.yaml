@@ -238,20 +238,20 @@ paths:
                 items:
                   $ref: "#/components/schemas/Device"
               example:
-                - serial_number: "12345"
-                  name: "Device A"
-                  type: "Type A"
-                  creation_date: "2023-01-15"
-                  location_id: 1
-                  location_name: "Location X"
-                  location_type: "Type X"
-                - serial_number: "67890"
-                  name: "Device B"
-                  type: "Type B"
-                  creation_date: "2023-02-20"
+                - creation_date: "2023-12-13"
                   location_id: 2
-                  location_name: "Location Y"
-                  location_type: "Type Y"
+                  location_name: "LocationB"
+                  location_type: "LocationTypeB"
+                  name: "DeviceB"
+                  serial_number: "1a"
+                  type: "TypeB"
+                - creation_date: "2023-12-14"
+                  location_id: 3
+                  location_name: "location c"
+                  location_type: "location type c"
+                  name: "device c"
+                  serial_number: "1ab"
+                  type: "type c"
         404:
           description: No devices found
           content:
@@ -349,7 +349,7 @@ paths:
     get:
       summary: Filter devices by metadata
       description: |
-        Example Request URL: `http://localhost:8080/devices/filter?start_date=2023-01-01&end_date=2023-03-31`
+        Example Request URL: `http://localhost:8080/devices/filter?start_date=2023-12-13&end_date=2023-12-14`
 
         At least one of these parameters must be indicated.
 
@@ -421,16 +421,16 @@ paths:
                 items:
                   $ref: "#/components/schemas/Device"
               example:
-                - serial_number: "12345"
-                  name: "Device A"
-                  type: "Type A"
-                  creation_date: "2023-01-15"
-                  location_id: 1
-                - serial_number: "67890"
-                  name: "Device B"
-                  type: "Type B"
-                  creation_date: "2023-02-20"
+                - creation_date: "2023-12-13"
                   location_id: 2
+                  name: "DeviceB"
+                  serial_number: "1a"
+                  type: "TypeB"
+                - creation_date: "2023-12-14"
+                  location_id: 3
+                  name: "device c"
+                  serial_number: "1ab"
+                  type: "type c"
         400:
           description: Invalid request parameters
           content:
