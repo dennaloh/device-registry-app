@@ -1,596 +1,565 @@
-"openapi": "3.0.0"
-"info":
-  "title": "Location API"
-  "version": "1.0.1"
-  "description": "API for managing a device registry"
-"components":
-  "schemas":
-    "Device":
-      "properties":
-        "serial_number":
-          "type": "string"
-          "description": "device serial number"
-        "name":
-          "type": "string"
-          "description": "device name"
-        "type":
-          "type": "string"
-          "description": "device type"
-        "creation_date":
-          "type": "string"
-          "format": "date"
-          "description": "date of creation of row in devices table is automatically set as today's date if not indicated (YYYY-MM-DD)"
-        "location_id":
-          "type": "integer"
-          "description": "ID of the device's location from the locations table"
-      "required":
-        - "serial_number"
-        - "name"
-        - "type"
-        - "location_id"
-    "Location":
-      "properties":
-        "id":
-          "type": "integer"
-          "description": "location ID is automatically generated when row is created in locations table if not indicated"
-        "name":
-          "type": "string"
-          "description": "location name"
-        "type":
-          "type": "string"
-          "description": "location type"
-      "required":
-        - "name"
-        - "type"
-"paths":
-  "/locations":
-    "get":
-      "summary": "Retrieve all locations"
-      "description": "Example Request URL: `http://localhost:8080/locations`\n"
-      "responses":
-        "200":
-          "description": "Successful response"
-          "content":
-            "application/json":
-              "schema":
-                "type": "array"
-                "items":
-                  "properties":
-                    "id":
-                      "type": "integer"
-                      "description": "location ID is automatically generated when row is created in locations table if not indicated"
-                    "name":
-                      "type": "string"
-                      "description": "location name"
-                    "type":
-                      "type": "string"
-                      "description": "location type"
-                  "required":
-                    - "name"
-                    - "type"
-              "example":
-                - "id": 1
-                  "name": "Location A"
-                  "type": "Type A"
-                - "id": 2
-                  "name": "Location B"
-                  "type": "Type B"
-        "404":
-          "description": "No locations found"
-          "content":
-            "application/json":
-              "example":
-                "status": "not found"
-                "message": "No locations found in locations table"
-    "post":
-      "summary": "Add a new location"
-      "description": "Example Request URL: `http://localhost:8080/locations?name=LocationA&type=LocationTypeA`\n"
-      "parameters":
-        - "in": "query"
-          "name": "id"
-          "required": false
-          "description": "location ID"
-          "schema":
-            "type": "integer"
-        - "in": "query"
-          "name": "name"
-          "required": true
-          "description": "location name"
-          "schema":
-            "type": "string"
-        - "in": "query"
-          "name": "type"
-          "required": true
-          "description": "location type"
-          "schema":
-            "type": "string"
-      "responses":
-        "200":
-          "description": "Location created successfully"
-          "content":
-            "application/json":
-              "example":
-                "status": "success"
-                "message": "New location created successfully: location A | type A"
-        "400":
-          "description": "Invalid request"
-          "content":
-            "application/json":
-              "examples":
-                "Invalid Parameters":
-                  "value":
-                    "status": "invalid"
-                    "message": "Invalid request parameters: Must have at least both name and type"
-                "Invalid ID":
-                  "value":
-                    "status": "invalid"
-                    "message": "Invalid id"
-        "409":
-          "description": "Conflict - Location ID already exists"
-          "content":
-            "application/json":
-              "example":
-                "status": "conflict"
-                "message": "Location ID already exists in locations table"
-        "500":
-          "description": "Failed to create location in DBHandler"
-          "content":
-            "application/json":
-              "example":
-                "status": "error"
-                "message": "Failed to create new location in DBHandler"
-  "/locations/{id}":
-    "patch":
-      "summary": "Update a location by ID"
-      "description": "Example Request URL: `http://localhost:8080/locations/1?name=LocationA&type=LocationTypeA`\n\nAt least 'name' or 'type' parameter must be indicated.\n"
-      "parameters":
-        - "in": "path"
-          "name": "id"
-          "required": true
-          "description": "location ID"
-          "schema":
-            "type": "integer"
-        - "in": "query"
-          "name": "name"
-          "required": false
-          "description": "location name"
-          "schema":
-            "type": "string"
-        - "in": "query"
-          "name": "type"
-          "required": false
-          "description": "location type"
-          "schema":
-            "type": "string"
-      "responses":
-        "200":
-          "description": "Successful update"
-          "content":
-            "application/json":
-              "example":
-                "status": "success"
-                "message": "Successfully updated location: 1"
-        "400":
-          "description": "Invalid request parameters"
-          "content":
-            "application/json":
-              "example":
-                "status": "invalid"
-                "message": "Invalid request parameters: Only name &/or type"
-        "404":
-          "description": "Location not found"
-          "content":
-            "application/json":
-              "example":
-                "status": "not found"
-                "message": "Location ID does not exist in locations table"
-        "500":
-          "description": "Server error"
-          "content":
-            "application/json":
-              "example":
-                "status": "error"
-                "message": "Failed to update location in DBHandler"
-    "delete":
-      "summary": "Delete a location by ID"
-      "description": "Example Request URL: `http://localhost:8080/locations/1`\n\nAll devices with this location ID will also be deleted.\n"
-      "parameters":
-        - "in": "path"
-          "name": "id"
-          "required": true
-          "description": "location ID"
-          "schema":
-            "type": "integer"
-      "responses":
-        "200":
-          "description": "Successful deletion"
-          "content":
-            "application/json":
-              "example":
-                "status": "success"
-                "message": "Successfully deleted location and devices with location id 1"
-        "404":
-          "description": "Location not found"
-          "content":
-            "application/json":
-              "example":
-                "status": "not found"
-                "message": "Location ID does not exist in locations table"
-        "500":
-          "description": "Server error"
-          "content":
-            "application/json":
-              "example":
-                "status": "error"
-                "message": "Failed to delete location and devices with this location id in DBHandler"
-  "/devices":
-    "get":
-      "summary": "Retrieve all devices"
-      "description": "Example Request URL: `http://localhost:8080/devices`\n"
-      "responses":
-        "200":
-          "description": "Successful response"
-          "content":
-            "application/json":
-              "schema":
-                "type": "array"
-                "items":
-                  "properties":
-                    "serial_number":
-                      "type": "string"
-                      "description": "device serial number"
-                    "name":
-                      "type": "string"
-                      "description": "device name"
-                    "type":
-                      "type": "string"
-                      "description": "device type"
-                    "creation_date":
-                      "type": "string"
-                      "format": "date"
-                      "description": "date of creation of row in devices table is automatically set as today's date if not indicated (YYYY-MM-DD)"
-                    "location_id":
-                      "type": "integer"
-                      "description": "ID of the device's location from the locations table"
-                  "required":
-                    - "serial_number"
-                    - "name"
-                    - "type"
-                    - "location_id"
-              "example":
-                - "serial_number": "12345"
-                  "name": "Device A"
-                  "type": "Type A"
-                  "creation_date": "2023-01-15"
-                  "location_id": 1
-                  "location_name": "Location X"
-                  "location_type": "Type X"
-                - "serial_number": "67890"
-                  "name": "Device B"
-                  "type": "Type B"
-                  "creation_date": "2023-02-20"
-                  "location_id": 2
-                  "location_name": "Location Y"
-                  "location_type": "Type Y"
-        "404":
-          "description": "No devices found"
-          "content":
-            "application/json":
-              "example":
-                "status": "not found"
-                "message": "No devices found in devices table"
-    "post":
-      "summary": "Add a new device"
-      "description": "Example Request URL: `http://localhost:8080/devices/new?serial_number=12345&name=DeviceA&type=TypeA&location_id=1`\n"
-      "parameters":
-        - "in": "query"
-          "name": "serial_number"
-          "required": true
-          "description": "device serial number"
-          "schema":
-            "type": "string"
-        - "in": "query"
-          "name": "name"
-          "required": true
-          "description": "device name"
-          "schema":
-            "type": "string"
-        - "in": "query"
-          "name": "type"
-          "required": true
-          "description": "device type"
-          "schema":
-            "type": "string"
-        - "in": "query"
-          "name": "creation_date"
-          "required": false
-          "description": "date of creation of row in devices table"
-          "schema":
-            "type": "string"
-            "format": "date"
-        - "in": "query"
-          "name": "location_id"
-          "required": true
-          "description": "ID of the device's location from the locations table"
-          "schema":
-            "type": "integer"
-      "responses":
-        "200":
-          "description": "Device created successfully"
-          "content":
-            "application/json":
-              "example":
-                "status": "success"
-                "message": "New device created successfully: 12345 | DeviceA | TypeA | 2023-12-20 | 1"
-        "400":
-          "description": "Invalid request"
-          "content":
-            "application/json":
-              "examples":
-                "Invalid Parameters":
-                  "value":
-                    "status": "invalid"
-                    "message": "Invalid request parameters: Must have at least serial_number, name, type, and location_id"
-                "Invalid Serial Number":
-                  "value":
-                    "status": "invalid"
-                    "message": "Invalid serial_number"
-                "Invalid Location ID":
-                  "value":
-                    "status": "invalid"
-                    "message": "Invalid location_id"
-                "Invalid Creation Date":
-                  "value":
-                    "status": "invalid"
-                    "message": "Invalid creation_date"
-        "404":
-          "description": "Location ID does not exist"
-          "content":
-            "application/json":
-              "example":
-                "status": "not found"
-                "message": "Location ID does not exist in locations table"
-        "409":
-          "description": "Conflict - Serial Number already exists"
-          "content":
-            "application/json":
-              "example":
-                "status": "conflict"
-                "message": "Serial Number already exists in devices table"
-        "500":
-          "description": "Failed to create device in DBHandler"
-          "content":
-            "application/json":
-              "example":
-                "status": "error"
-                "message": "Failed to create new device in DBHandler"
-  "/devices/filter":
-    "get":
-      "summary": "Filter devices by metadata"
-      "description": "Example Request URL: `http://localhost:8080/devices/filter?location_id=1&start_date=2023-08-08&end_date=2023-12-31`\n\nAt lease 'serial_number' or 'name' or 'type' or 'creation_date' or 'location_id' or 'start_date' or 'end_date' or 'location_name' or 'location_type' parameter must be indicated.\n"
-      "parameters":
-        - "in": "query"
-          "name": "serial_number"
-          "required": false
-          "description": "device serial number"
-          "schema":
-            "type": "string"
-        - "in": "query"
-          "name": "name"
-          "required": false
-          "description": "device name"
-          "schema":
-            "type": "string"
-        - "in": "query"
-          "name": "type"
-          "required": false
-          "description": "device type"
-          "schema":
-            "type": "string"
-        - "in": "query"
-          "name": "creation_date"
-          "required": false
-          "description": "date of creation of row in devices table"
-          "schema":
-            "type": "string"
-            "format": "date"
-        - "in": "query"
-          "name": "location_id"
-          "required": false
-          "description": "location ID"
-          "schema":
-            "type": "integer"
-        - "in": "query"
-          "name": "start_date"
-          "required": false
-          "description": "start date for filtering creation dates from this date onwards"
-          "schema":
-            "type": "string"
-            "format": "date"
-        - "in": "query"
-          "name": "end_date"
-          "required": false
-          "description": "end date for filtering creation dates until this date"
-          "schema":
-            "type": "string"
-            "format": "date"
-        - "in": "query"
-          "name": "location_name"
-          "required": false
-          "description": "location name"
-          "schema":
-            "type": "string"
-        - "in": "query"
-          "name": "location_type"
-          "required": false
-          "description": "location type"
-          "schema":
-            "type": "string"
-      "responses":
-        "200":
-          "description": "Successful response"
-          "content":
-            "application/json":
-              "schema":
-                "type": "array"
-                "items":
-                  "properties":
-                    "serial_number":
-                      "type": "string"
-                      "description": "device serial number"
-                    "name":
-                      "type": "string"
-                      "description": "device name"
-                    "type":
-                      "type": "string"
-                      "description": "device type"
-                    "creation_date":
-                      "type": "string"
-                      "format": "date"
-                      "description": "date of creation of row in devices table is automatically set as today's date if not indicated (YYYY-MM-DD)"
-                    "location_id":
-                      "type": "integer"
-                      "description": "ID of the device's location from the locations table"
-                  "required":
-                    - "serial_number"
-                    - "name"
-                    - "type"
-                    - "location_id"
-              "example":
-                - "serial_number": "12345"
-                  "name": "Device A"
-                  "type": "Type A"
-                  "creation_date": "2023-01-15"
-                  "location_id": 1
-                - "serial_number": "67890"
-                  "name": "Device B"
-                  "type": "Type B"
-                  "creation_date": "2023-02-20"
-                  "location_id": 2
-        "400":
-          "description": "Invalid request parameters"
-          "content":
-            "application/json":
-              "example":
-                "status": "invalid"
-                "message": "Invalid request parameters: Only serial_number, name, type, creation_date, location_id, start_date, end_date, location_name, location_type"
-        "404":
-          "description": "No devices match filters"
-          "content":
-            "application/json":
-              "example":
-                "status": "not found"
-                "message": "No devices match filters"
-  "/devices/{serial_number}":
-    "patch":
-      "summary": "Update a device by serial number"
-      "description": "Example Request URL: `http://localhost:8080/devices/1?name=DeviceA&creation_date=2023-07-30`\n\nAt least 'name' or 'type' or 'creation_date' or 'location_id' parameter must be indicated.\n"
-      "parameters":
-        - "in": "path"
-          "name": "serial_number"
-          "required": true
-          "description": "device serial number"
-          "schema":
-            "type": "string"
-        - "in": "query"
-          "name": "name"
-          "required": false
-          "description": "device name"
-          "schema":
-            "type": "string"
-        - "in": "query"
-          "name": "type"
-          "required": false
-          "description": "device type"
-          "schema":
-            "type": "string"
-        - "in": "query"
-          "name": "creation_date"
-          "required": false
-          "description": "date of creation of row in devices table"
-          "schema":
-            "type": "string"
-            "format": "date"
-        - "in": "query"
-          "name": "location_id"
-          "required": false
-          "description": "ID of the device's location from the locations table"
-          "schema":
-            "type": "integer"
-      "responses":
-        "200":
-          "description": "Successful update"
-          "content":
-            "application/json":
-              "example":
-                "status": "success"
-                "message": "Successfully updated device: 1"
-        "400":
-          "description": "Invalid request parameters"
-          "content":
-            "application/json":
-              "examples":
-                "Invalid Parameters":
-                  "value":
-                    "status": "invalid"
-                    "message": "Invalid request parameters: Only name &/or type &/or creation_date &/or location_id"
-                "Invalid Creation Date":
-                  "value":
-                    "status": "invalid"
-                    "message": "Invalid creation_date"
-                "Invalid Location ID":
-                  "value":
-                    "status": "invalid"
-                    "message": "Invalid location_id"
-        "404":
-          "description": "Device not found"
-          "content":
-            "application/json":
-              "examples":
-                "Serial Number not found":
-                  "value":
-                    "status": "not found"
-                    "message": "Serial Number does not exist in devices table"
-                "Location ID not found":
-                  "value":
-                    "status": "not found"
-                    "message": "Location ID does not exist in locations table"
-        "500":
-          "description": "Server error"
-          "content":
-            "application/json":
-              "example":
-                "status": "error"
-                "message": "Failed to update device in DBHandler"
-    "delete":
-      "summary": "Delete a device by serial number"
-      "description": "Example Request URL: `http://localhost:8080/devices/1`\n"
-      "parameters":
-        - "in": "path"
-          "name": "serial_number"
-          "required": true
-          "description": "device serial number"
-          "schema":
-            "type": "string"
-      "responses":
-        "200":
-          "description": "Successful deletion"
-          "content":
-            "application/json":
-              "example":
-                "status": "success"
-                "message": "Successfully deleted device 1"
-        "404":
-          "description": "Device not found"
-          "content":
-            "application/json":
-              "example":
-                "status": "not found"
-                "message": "Serial Number does not exist in devices table"
-        "500":
-          "description": "Server error"
-          "content":
-            "application/json":
-              "example":
-                "status": "error"
-                "message": "Failed to delete device in DBHandler"
+openapi: 3.0.0
+info:
+  title: Location API
+  version: 1.0.2
+  description: API for managing a device registry
+
+components:
+  schemas:
+    Location:
+      properties:
+        id:
+          type: integer
+          description: location ID is automatically generated when row is created in locations table if not indicated
+        name:
+          type: string
+          description: location name
+        type:
+          type: string
+          description: location type
+      required:
+        - name
+        - type
+    Device:
+      properties:
+        serial_number:
+          type: string
+          description: device serial number
+        name:
+          type: string
+          description: device name
+        type:
+          type: string
+          description: device type
+        creation_date:
+          type: string
+          format: date
+          description: date of creation of row in devices table is automatically set as today's date if not indicated (YYYY-MM-DD)
+        location_id:
+          type: integer
+          description: ID of the device's location from the locations table
+      required:
+        - serial_number
+        - name
+        - type
+        - location_id
+
+paths:
+  /locations:
+    get:
+      summary: Retrieve all locations
+      description: |
+        Example Request URL: `http://localhost:8080/locations`
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Location"
+              example:
+                - id: 1
+                  name: "Location A"
+                  type: "Location Type A"
+                - id: 2
+                  name: "locationb"
+                  type: "locationtypeb"
+        404:
+          description: No locations found
+          content:
+            application/json:
+              example:
+                status: "not found"
+                message: "No locations found in locations table"
+    post:
+      summary: Add a new location
+      description: |
+        Example Request URL: `http://localhost:8080/locations?name=LocationA&type=LocationTypeA`
+      parameters:
+        - in: query
+          name: id
+          required: false
+          description: location ID
+          schema:
+            type: integer
+        - in: query
+          name: name
+          required: true
+          description: location name
+          schema:
+            type: string
+        - in: query
+          name: type
+          required: true
+          description: location type
+          schema:
+            type: string
+      responses:
+        200:
+          description: Location created successfully
+          content:
+            application/json:
+              example:
+                status: "success"
+                message: "New location created successfully: location A | type A"
+        400:
+          description: Invalid request
+          content:
+            application/json:
+              examples:
+                Invalid Parameters:
+                  value:
+                    status: "invalid"
+                    message: "Invalid request parameters: Must have at least both name and type"
+                Invalid ID:
+                  value:
+                    status: "invalid"
+                    message: "Invalid id"
+        409:
+          description: Conflict - Location ID already exists
+          content:
+            application/json:
+              example:
+                status: "conflict"
+                message: "Location ID already exists in locations table"
+        500:
+          description: Failed to create location in DBHandler
+          content:
+            application/json:
+              example:
+                status: "error"
+                message: "Failed to create new location in DBHandler"
+  /locations/{id}:
+    patch:
+      summary: Update a location by ID
+      description: |
+        Example Request URL: `http://localhost:8080/locations/1?name=LocationA&type=LocationTypeA`
+
+        At least 'name' or 'type' parameter must be indicated.
+
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: location ID
+          schema:
+            type: integer
+        - in: query
+          name: name
+          required: false
+          description: location name
+          schema:
+            type: string
+        - in: query
+          name: type
+          required: false
+          description: location type
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful update
+          content:
+            application/json:
+              example:
+                status: "success"
+                message: "Successfully updated location: 1"
+        400:
+          description: Invalid request parameters
+          content:
+            application/json:
+              example:
+                status: "invalid"
+                message: "Invalid request parameters: Only name &/or type"
+        404:
+          description: Location not found
+          content:
+            application/json:
+              example:
+                status: "not found"
+                message: "Location ID does not exist in locations table"
+        500:
+          description: Server error
+          content:
+            application/json:
+              example:
+                status: "error"
+                message: "Failed to update location in DBHandler"
+    delete:
+      summary: Delete a location by ID
+      description: |
+        Example Request URL: `http://localhost:8080/locations/1`
+
+        All devices with this location ID will also be deleted.
+
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: location ID
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Successful deletion
+          content:
+            application/json:
+              example:
+                status: "success"
+                message: "Successfully deleted location and devices with location id 1"
+        404:
+          description: Location not found
+          content:
+            application/json:
+              example:
+                status: "not found"
+                message: "Location ID does not exist in locations table"
+        500:
+          description: Server error
+          content:
+            application/json:
+              example:
+                status: "error"
+                message: "Failed to delete location and devices with this location id in DBHandler"
+  /devices:
+    get:
+      summary: Retrieve all devices
+      description: |
+        Example Request URL: `http://localhost:8080/devices`
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Device"
+              example:
+                - serial_number: "12345"
+                  name: "Device A"
+                  type: "Type A"
+                  creation_date: "2023-01-15"
+                  location_id: 1
+                  location_name: "Location X"
+                  location_type: "Type X"
+                - serial_number: "67890"
+                  name: "Device B"
+                  type: "Type B"
+                  creation_date: "2023-02-20"
+                  location_id: 2
+                  location_name: "Location Y"
+                  location_type: "Type Y"
+        404:
+          description: No devices found
+          content:
+            application/json:
+              example:
+                status: "not found"
+                message: "No devices found in devices table"
+    post:
+      summary: Add a new device
+      description: |
+        Example Request URL: `http://localhost:8080/devices/new?serial_number=12345&name=DeviceA&type=TypeA&location_id=1`
+      parameters:
+        - in: query
+          name: serial_number
+          required: true
+          description: device serial number
+          schema:
+            type: string
+        - in: query
+          name: name
+          required: true
+          description: device name
+          schema:
+            type: string
+        - in: query
+          name: type
+          required: true
+          description: device type
+          schema:
+            type: string
+        - in: query
+          name: creation_date
+          required: false
+          description: date of creation of row in devices table
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: location_id
+          required: true
+          description: ID of the device's location from the locations table
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Device created successfully
+          content:
+            application/json:
+              example:
+                status: "success"
+                message: "New device created successfully: 12345 | DeviceA | TypeA | 2023-12-20 | 1"
+        400:
+          description: Invalid request
+          content:
+            application/json:
+              examples:
+                Invalid Parameters:
+                  value:
+                    status: "invalid"
+                    message: "Invalid request parameters: Must have at least serial_number, name, type, and location_id"
+                Invalid Serial Number:
+                  value:
+                    status: "invalid"
+                    message: "Invalid serial_number"
+                Invalid Location ID:
+                  value:
+                    status: "invalid"
+                    message: "Invalid location_id"
+                Invalid Creation Date:
+                  value:
+                    status: "invalid"
+                    message: "Invalid creation_date"
+        404:
+          description: Location ID does not exist
+          content:
+            application/json:
+              example:
+                status: "not found"
+                message: "Location ID does not exist in locations table"
+        409:
+          description: Conflict - Serial Number already exists
+          content:
+            application/json:
+              example:
+                status: "conflict"
+                message: "Serial Number already exists in devices table"
+        500:
+          description: Failed to create device in DBHandler
+          content:
+            application/json:
+              example:
+                status: "error"
+                message: "Failed to create new device in DBHandler"
+  /devices/filter:
+    get:
+      summary: Filter devices by metadata
+      description: |
+        Example Request URL: `http://localhost:8080/devices/filter?location_id=1&start_date=2023-08-08&end_date=2023-12-31`
+
+        At least 'serial_number' or 'name' or 'type' or 'creation_date' or 'location_id' or 'start_date' or 'end_date' or 'location_name' or 'location_type' parameter must be indicated.
+
+      parameters:
+        - in: query
+          name: serial_number
+          required: false
+          description: device serial number
+          schema:
+            type: string
+        - in: query
+          name: name
+          required: false
+          description: device name
+          schema:
+            type: string
+        - in: query
+          name: type
+          required: false
+          description: device type
+          schema:
+            type: string
+        - in: query
+          name: creation_date
+          required: false
+          description: date of creation of row in devices table
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: location_id
+          required: false
+          description: location ID
+          schema:
+            type: integer
+        - in: query
+          name: start_date
+          required: false
+          description: start date for filtering creation dates from this date onwards
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: end_date
+          required: false
+          description: end date for filtering creation dates until this date
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: location_name
+          required: false
+          description: location name
+          schema:
+            type: string
+        - in: query
+          name: location_type
+          required: false
+          description: location type
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Device"
+              example:
+                - serial_number: "12345"
+                  name: "Device A"
+                  type: "Type A"
+                  creation_date: "2023-01-15"
+                  location_id: 1
+                - serial_number: "67890"
+                  name: "Device B"
+                  type: "Type B"
+                  creation_date: "2023-02-20"
+                  location_id: 2
+        400:
+          description: Invalid request parameters
+          content:
+            application/json:
+              example:
+                status: "invalid"
+                message: "Invalid request parameters: Only serial_number, name, type, creation_date, location_id, start_date, end_date, location_name, location_type"
+        404:
+          description: No devices match filters
+          content:
+            application/json:
+              example:
+                status: "not found"
+                message: "No devices match filters"
+  /devices/{serial_number}:
+    patch:
+      summary: Update a device by serial number
+      description: |
+        Example Request URL: `http://localhost:8080/devices/1?name=DeviceA&creation_date=2023-07-30`
+
+        At least 'name' or 'type' or 'creation_date' or 'location_id' parameter must be indicated.
+
+      parameters:
+        - in: path
+          name: serial_number
+          required: true
+          description: device serial number
+          schema:
+            type: string
+        - in: query
+          name: name
+          required: false
+          description: device name
+          schema:
+            type: string
+        - in: query
+          name: type
+          required: false
+          description: device type
+          schema:
+            type: string
+        - in: query
+          name: creation_date
+          required: false
+          description: date of creation of row in devices table
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: location_id
+          required: false
+          description: ID of the device's location from the locations table
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Successful update
+          content:
+            application/json:
+              example:
+                status: "success"
+                message: "Successfully updated device: 1"
+        400:
+          description: Invalid request
+          content:
+            application/json:
+              examples:
+                Invalid Parameters:
+                  value:
+                    status: "invalid"
+                    message: "Invalid request parameters: Only name &/or type &/or creation_date &/or location_id"
+                Invalid Creation Date:
+                  value:
+                    status: "invalid"
+                    message: "Invalid creation_date"
+                Invalid Location ID:
+                  value:
+                    status: "invalid"
+                    message: "Invalid location_id"
+        404:
+          description: Device not found
+          content:
+            application/json:
+              examples:
+                Serial Number not found:
+                  value:
+                    status: "not found"
+                    message: "Serial Number does not exist in devices table"
+                Location ID not found:
+                  value:
+                    status: "not found"
+                    message: "Location ID does not exist in locations table"
+        500:
+          description: Server error
+          content:
+            application/json:
+              example:
+                status: "error"
+                message: "Failed to update device in DBHandler"
+    delete:
+      summary: Delete a device by serial number
+      description: |
+        Example Request URL: `http://localhost:8080/devices/1`
+      parameters:
+        - in: path
+          name: serial_number
+          required: true
+          description: device serial number
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful deletion
+          content:
+            application/json:
+              example:
+                status: "success"
+                message: "Successfully deleted device 1"
+        404:
+          description: Device not found
+          content:
+            application/json:
+              example:
+                status: "not found"
+                message: "Serial Number does not exist in devices table"
+        500:
+          description: Server error
+          content:
+            application/json:
+              example:
+                status: "error"
+                message: "Failed to delete device in DBHandler"
