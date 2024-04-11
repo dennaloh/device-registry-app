@@ -1,6 +1,4 @@
-# Canonical Technical Assessment
-
-## Running My C++ Application with Docker
+# Running My C++ Application with Docker
 
 1. To build the Docker image, open `canonical_ta` directory and run:
 
