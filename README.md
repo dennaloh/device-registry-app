@@ -1,6 +1,6 @@
 # Running My C++ Application with Docker
 
-1. To build the Docker image, open `canonical_ta` directory and run:
+1. To build the Docker image, open directory and run:
 
 ```bash
 docker build -t my-cpp-app .
